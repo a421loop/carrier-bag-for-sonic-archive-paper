@@ -1,0 +1,778 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><script src="config.js"></script></head><body>
+<title>Carrier Bag</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500&display=swap">
+<style>
+/* One screen of pale paper. A basket of sand along the bottom; each recording is a pixel flower.
+   Single look on purpose. Colors: pale pink paper, plum #741b47 + yellow #f1c232 blooms, sand. */
+:root{
+  --paper:#f2e6e6;
+  --ink:#4c1130;          /* deep plum, for the little text there is */
+  --burgundy:#741b47;
+  --blue:#f1c232;
+  --soft:#a58c90;
+  --f-pix:"Pixelify Sans","Courier New",monospace;
+  color-scheme:light;
+}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-pix);font-size:16px;overflow:hidden}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--burgundy);outline-offset:2px}
+#cv{position:fixed;left:0;top:0;image-rendering:pixelated;touch-action:manipulation}
+#cv.over{cursor:pointer}
+
+.top{position:fixed;left:0;right:0;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;gap:12px;
+  padding-block:calc(10px + env(safe-area-inset-top,0px)) 0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.bags{display:flex;gap:4px 14px;flex-wrap:wrap;align-items:baseline;min-width:0}
+.tab{background:none;border:0;padding:0;cursor:pointer;color:var(--soft);border-bottom:2px solid transparent;white-space:nowrap}
+.tab[aria-current="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+.tab .two{color:var(--burgundy);margin-left:4px}
+.right{display:flex;gap:10px;align-items:center;flex:none}
+.dot{width:20px;height:20px;border:2px solid var(--ink);overflow:hidden;background:var(--paper)}
+.dot img{width:100%;height:100%;object-fit:cover;image-rendering:pixelated}
+.dot.empty{border-style:dashed;border-color:var(--soft)}
+.add{cursor:pointer;color:var(--ink);border:2px solid var(--ink);padding:1px 8px;background:var(--paper);box-shadow:3px 3px 0 var(--blue)}
+.add:hover{box-shadow:3px 3px 0 var(--burgundy)}
+.add input{display:none}
+.add.busy{animation:blink .6s steps(2) infinite}
+@keyframes blink{50%{opacity:.4}}
+
+.label{position:fixed;z-index:4;transform:translate(-50%,-100%);color:var(--burgundy);pointer-events:none;white-space:nowrap;max-width:calc(100vw - 24px);overflow:hidden;text-overflow:ellipsis;
+  background:var(--paper);padding:0 4px}
+.hint{position:fixed;left:50%;transform:translateX(-50%);white-space:nowrap;color:var(--soft);pointer-events:none;z-index:3}
+.words{position:fixed;left:50%;top:calc(52px + env(safe-area-inset-top,0px));transform:translateX(-50%);color:var(--burgundy);text-align:center;
+  max-width:min(520px,calc(100% - 32px));pointer-events:none;z-index:6;background:var(--paper);padding:2px 8px}
+
+.card{position:fixed;z-index:10;background:var(--paper);border:2px solid var(--ink);box-shadow:4px 4px 0 var(--burgundy);padding:10px 12px;
+  display:flex;flex-direction:column;gap:8px;width:250px}
+.card input[type=email],.card input[type=text]{background:#fff8;border:0;border-bottom:2px solid var(--ink);padding:2px 4px;width:100%;font-size:18px}
+.card .row{display:flex;gap:6px 14px;flex-wrap:wrap}
+.card button{background:none;border:0;padding:0;cursor:pointer;border-bottom:2px solid #4c113044}
+.card button.on{border-bottom-color:var(--burgundy);color:var(--burgundy)}
+.card .bye{color:var(--burgundy);border-color:transparent}
+.card .soft{font-size:14px;color:var(--soft)}
+.testbtn{position:fixed;left:max(12px,env(safe-area-inset-left,0px));bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:5;background:var(--paper);border:2px dashed var(--soft);color:var(--soft);cursor:pointer;padding:0 6px;font-size:14px}
+.testbtn.on{border-style:solid;border-color:var(--burgundy);color:var(--burgundy)}
+.test{position:fixed;left:max(12px,env(safe-area-inset-left,0px));bottom:calc(112px + env(safe-area-inset-bottom,0px));z-index:9;width:min(290px,calc(100% - 24px));background:var(--paper);border:2px solid var(--ink);box-shadow:4px 4px 0 var(--blue);padding:10px 12px;display:flex;flex-direction:column;gap:8px;font-size:15px}
+.test label{display:flex;gap:8px;align-items:center;cursor:pointer}
+.test input[type=range]{width:100%;accent-color:var(--burgundy)}
+.test .soft{color:var(--soft);font-size:13px}
+.all{cursor:pointer;color:var(--ink);border:2px solid var(--ink);padding:1px 8px;background:var(--paper);box-shadow:3px 3px 0 var(--burgundy)}
+.all.on{background:var(--burgundy);color:var(--paper)}
+/* the drawing pad */
+.card.pad{left:50%!important;top:50%!important;transform:translate(-50%,-50%);width:min(300px,calc(100vw - 32px))}
+.card.pad .step{font-size:13px;color:var(--soft)}
+#padCv{width:100%;aspect-ratio:1;image-rendering:pixelated;border:2px solid var(--ink);background:#fff8;touch-action:none;cursor:crosshair}
+.sw{display:flex;gap:4px;flex-wrap:wrap}
+.sw button{width:24px;height:24px;border:2px solid transparent!important;padding:0;cursor:pointer}
+.sw button[aria-pressed="true"]{border-color:var(--ink)!important;outline:2px solid var(--paper);outline-offset:-4px}
+.sw .eraser{background:repeating-linear-gradient(45deg,#fff 0 4px,#e6d6d6 4px 8px)}
+.card button.go{background:var(--burgundy);color:var(--paper);padding:1px 10px;border:0}
+</style>
+
+<canvas id="cv" aria-label="Carrier bag of recordings"></canvas>
+<div class="top">
+  <nav class="bags" id="bags" aria-label="Baskets"></nav>
+  <div class="right"><div class="right" id="here" aria-label="Who is here"></div>
+    <label class="add" id="add" hidden>+ add<input type="file" id="fileIn" accept="audio/*,.m4a,.mp3,.wav,.ogg,.webm,.aac,.flac,.opus" multiple></label>
+    <button class="all" id="share" hidden>share</button></div>
+</div>
+<div class="label" id="label" hidden></div>
+<div class="hint" id="hint" hidden>add a recording to plant it</div>
+<div class="words" id="words" hidden></div>
+<button class="testbtn" id="testbtn" aria-expanded="false">test</button>
+<div class="test" id="test" hidden>
+  <div>days passed: <b id="daysOut">0</b></div>
+  <input type="range" id="days" min="0" max="20" step="1" value="0" aria-label="Days passed">
+  <span class="soft">only on your screen · flowers wither after 3 days, fully at 14</span>
+  <label><input type="checkbox" id="tabs"> count my other tabs as people</label>
+  <label><input type="checkbox" id="fake"> pretend someone is here</label>
+  <span class="soft">for shared baskets (∘∘). open this page in a second tab to try playing together.</span>
+</div>
+
+<script>
+/* Carrier bag
+   Each recording is a pixel flower in a basket of sand.
+   - Tap it: the recording plays and the flower grows, pixel by pixel.
+   - Leave it: after 3 days it starts to wither; petals fall into the sand.
+   - Most played = tallest.
+   - A basket you share only plays when two people are here, and a tap plays for both.
+   Storage: inside this artifact (db = baskets, assets = audio, room = who's here).
+   Opened as a plain file it keeps things in this browser only. */
+
+const DAY = 864e5, now = () => Date.now();
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const $ = s => document.querySelector(s);
+const uid = () => (crypto.randomUUID ? crypto.randomUUID().replace(/-/g, '').slice(0, 12) : Math.random().toString(36).slice(2, 14));
+function hash(s){ let h = 2166136261; for (const c of String(s)) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+function rng(seed){ let s = hash(seed) || 1; return () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; }; }
+
+/* =================== storage backends (same shape for both) =================== */
+const PIECE = 19 * 1024 * 1024, joined = new Map();
+function cloudBackend(db, assets, user, me){
+  let mine = {}, shared = {}, onChange = () => {};
+  const emit = () => onChange({ ...mine, ...shared });
+  const ref = b => b.shared ? db.doc('bags/' + b.id) : db.doc(`data/users/${me}/${b.id}`);
+  return {
+    kind: 'cloud', canAdd: !!assets,
+    start(cb){
+      onChange = cb;
+      let answered = 0; const done = () => { if (++answered === 2) clearTimeout(slow); };
+      const slow = setTimeout(() => say('can’t reach your basket yet…'), 10000);
+      db.collection('data/users/' + me).onSnapshot(s => { mine = {}; s.docs.forEach(d => mine[d.id] = { ...structuredClone(d.data()), id: d.id, shared: false }); if (!s.metadata.fromCache) done(); emit(); }, () => done());
+      db.collection('bags').onSnapshot(s => { shared = {}; s.docs.forEach(d => shared[d.id] = { ...structuredClone(d.data()), id: d.id, shared: true }); if (!s.metadata.fromCache) done(); emit(); }, () => done());
+    },
+    async createBag(name){ const b = { id: uid(), name, created: now(), owner: me, flowers: {} }; await ref({ ...b, shared: false }).set(b); return b.id; },
+    rename: (b, name) => ref(b).update({ name }),
+    async setShared(b, on){
+      const body = { name: b.name, created: b.created, owner: b.owner || me, flowers: b.flowers || {} };
+      await ref({ ...b, shared: on }).set(body); await ref(b).delete();
+    },
+    async deleteBag(b){ if (assets) for (const f of Object.values(b.flowers || {})) for (const id of [f.asset, ...(f.parts || [])].filter(Boolean)) await assets.delete(id).catch(() => {}); await ref(b).delete(); },
+    addFlower: (b, f) => ref(b).update({ flowers: { [f.id]: f } }),
+    patchFlower: (b, fid, p) => ref(b).update({ flowers: { [fid]: p } }),
+    patchMany: (b, m) => ref(b).update({ flowers: m }),
+    async removeFlower(b, fid){
+      const f = b.flowers[fid], rest = { ...b.flowers }; delete rest[fid];
+      await ref(b).set({ name: b.name, created: b.created, owner: b.owner || me, flowers: rest });
+      if (assets && f) [f.asset, ...(f.parts || [])].filter(Boolean).forEach(id => assets.delete(id).catch(() => {}));
+    },
+    /* storage takes one file up to 20 MB, so a longer recording goes up in pieces
+       (each piece starts with one marker byte) and is joined again when it plays */
+    async putAudio(file, fid, progress){
+      const ext = (file.name.split('.').pop() || '').toLowerCase();
+      const type = ['webm', 'ogg', 'opus', 'oga'].includes(ext) || /webm|ogg|opus/.test(file.type) ? 'video/webm' : 'video/mp4';
+      if (file.size <= PIECE) return { asset: (await assets.upload(file, { type })).id };
+      const parts = [], n = Math.ceil(file.size / PIECE);
+      try {
+        for (let i = 0; i < n; i++) {
+          progress?.(i + 1, n);
+          const piece = new Blob([new Uint8Array([0]), file.slice(i * PIECE, (i + 1) * PIECE)], { type: 'video/mp4' });
+          parts.push((await assets.upload(piece, { type: 'video/mp4' })).id);
+        }
+      } catch (e) { parts.forEach(id => assets.delete(id).catch(() => {})); throw e; }
+      return { parts, mime: file.type || 'audio/mp4' };
+    },
+    async audioSrc(f){
+      if (f.asset) return '/_blob/' + f.asset;
+      if (!f.parts?.length) return null;
+      if (joined.has(f.id)) return joined.get(f.id);
+      const bufs = await Promise.all(f.parts.map(id => fetch('/_blob/' + id).then(r => { if (!r.ok) throw 0; return r.arrayBuffer(); })));
+      const url = URL.createObjectURL(new Blob(bufs.map(b => b.slice(1)), { type: f.mime || 'audio/mp4' }));
+      joined.set(f.id, url); return url;
+    },
+  };
+}
+function localBackend(){
+  let dbp; const open = () => dbp ||= new Promise((res, rej) => { try { const r = indexedDB.open('carrier-bag-2', 1);
+    r.onupgradeneeded = () => { r.result.createObjectStore('kv'); r.result.createObjectStore('audio'); };
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); } catch (e) { rej(e); } });
+  const q = (st, m, fn) => open().then(db => new Promise((res, rej) => { const r = fn(db.transaction(st, m).objectStore(st)); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }));
+  const mem = new Map(); let bags = {}, cb = () => {};
+  const save = () => { q('kv', 'readwrite', o => o.put(bags, 'bags')).catch(() => {}); cb(JSON.parse(JSON.stringify(bags))); };
+  return {
+    kind: 'local', canAdd: true,
+    async start(c){ cb = c; bags = (await q('kv', 'readonly', o => o.get('bags')).catch(() => null)) || {}; cb(JSON.parse(JSON.stringify(bags))); },
+    async createBag(name){ const id = uid(); bags[id] = { id, name, created: now(), shared: false, flowers: {} }; save(); return id; },
+    rename(b, name){ bags[b.id].name = name; save(); },
+    setShared(){},
+    deleteBag(b){ delete bags[b.id]; save(); },
+    addFlower(b, f){ bags[b.id].flowers[f.id] = f; save(); },
+    patchFlower(b, fid, p){ Object.assign(bags[b.id].flowers[fid], p); save(); },
+    patchMany(b, m){ for (const k in m) Object.assign(bags[b.id].flowers[k], m[k]); save(); },
+    removeFlower(b, fid){ delete bags[b.id].flowers[fid]; q('audio', 'readwrite', o => o.delete(fid)).catch(() => {}); save(); },
+    async putAudio(file, fid){ mem.set(fid, file); await q('audio', 'readwrite', o => o.put(file, fid)).catch(() => {}); return {}; },
+    async audioSrc(f){ const blob = mem.get(f.id) || await q('audio', 'readonly', o => o.get(f.id)).catch(() => null); return blob ? URL.createObjectURL(blob) : null; },
+  };
+}
+
+
+/* ---------- your own site: Supabase (used when config.js has your project's URL and key) ---------- */
+function supabaseBackend(sb, me){
+  let onChange = () => {}, timer = null;
+  const fromRow = r => ({ id: r.id, name: r.name, created: Number(r.created), shared: r.shared, owner: r.owner, flowers: r.flowers || {} });
+  const load = async () => {
+    const { data, error } = await sb.from('bags').select('*');
+    if (error) { say('can’t reach your basket · ' + error.message); return; }
+    onChange(Object.fromEntries(data.map(r => [r.id, fromRow(r)])));
+  };
+  const reload = () => { clearTimeout(timer); timer = setTimeout(load, 120); };
+  const must = async q => { const { error } = await q; if (error) throw error; };
+  const del = paths => paths.length && sb.storage.from('audio').remove(paths).catch(() => {});
+  const pathsOf = f => [f.audio, ...(f.parts || [])].filter(Boolean);
+  return {
+    kind: 'supabase', shares: true, canAdd: true,
+    async start(cb){
+      onChange = cb;
+      const want = (location.hash.match(/^#b-([A-Za-z0-9]+)/) || [])[1];
+      if (want) await sb.rpc('join_bag', { bag_id: want });        // opening a friend's link adds you to that basket
+      await load();
+      sb.channel('bags-changes').on('postgres_changes', { event: '*', schema: 'public', table: 'bags' }, reload).subscribe();
+    },
+    async createBag(name){ const id = uid(); await must(sb.from('bags').insert({ id, name, created: now(), owner: me })); await load(); return id; },
+    rename: (b, name) => must(sb.from('bags').update({ name }).eq('id', b.id)),
+    setShared: async (b, on) => { await must(sb.from('bags').update({ shared: on }).eq('id', b.id)); await load(); },
+    async deleteBag(b){ del(flowersOf(b).flatMap(pathsOf)); await must(sb.from('bags').delete().eq('id', b.id)); await load(); },
+    addFlower: (b, f) => must(sb.rpc('add_flower', { bag_id: b.id, flower: f })),
+    patchFlower: (b, fid, p) => must(sb.rpc('patch_flower', { bag_id: b.id, fid, patch: p })),
+    countPlay: (b, fid) => must(sb.rpc('play_flower', { bag_id: b.id, fid })),
+    async patchMany(b, m){ for (const k in m) await must(sb.rpc('patch_flower', { bag_id: b.id, fid: k, patch: m[k] })); },
+    async removeFlower(b, fid){ const f = b.flowers[fid]; await must(sb.rpc('remove_flower', { bag_id: b.id, fid })); if (f) del(pathsOf(f)); },
+    /* the free plan takes files up to 50 MB; longer recordings go up in pieces and are joined again to play */
+    async putAudio(file, fid, progress){
+      const put = async (path, blob) => must(sb.storage.from('audio').upload(path, blob, { contentType: blob.type || 'application/octet-stream', upsert: false }));
+      const SIZE = 45 * 1024 * 1024, base = `${me}/${fid}`;
+      if (file.size <= SIZE) { await put(base, file); return { audio: base, mime: file.type || '' }; }
+      const parts = [], n = Math.ceil(file.size / SIZE);
+      try { for (let i = 0; i < n; i++) { progress?.(i + 1, n); const pth = `${base}.${i}`; await put(pth, file.slice(i * SIZE, (i + 1) * SIZE)); parts.push(pth); } }
+      catch (e) { del(parts); throw e; }
+      return { parts, mime: file.type || '' };
+    },
+    async audioSrc(f){
+      if (joined.has(f.id)) return joined.get(f.id);
+      if (f.audio) { const { data } = await sb.storage.from('audio').createSignedUrl(f.audio, 6 * 3600); return data?.signedUrl || null; }
+      if (!f.parts?.length) return null;
+      const blobs = await Promise.all(f.parts.map(pth => sb.storage.from('audio').download(pth).then(r => { if (r.error) throw r.error; return r.data; })));
+      const url = URL.createObjectURL(new Blob(blobs, { type: f.mime || 'audio/mp4' })); joined.set(f.id, url); return url;
+    },
+  };
+}
+/* who's here + play/stop for a shared basket, over Supabase Realtime, shaped like the artifact's room */
+function supabaseRoom(sb, me, myName){
+  const tab = uid();
+  return { async join(name){
+    const ch = sb.channel(name, { config: { presence: { key: tab }, broadcast: { self: true } } });
+    const peerFns = [], topics = {};
+    let list = [];
+    ch.on('presence', { event: 'sync' }, () => {
+      list = Object.entries(ch.presenceState()).map(([k, arr]) => ({ kind: 'viewer', peer: k, by: arr[0]?.user || null, name: arr[0]?.name || '', isMe: arr[0]?.user === me, sameTab: k === tab }));
+      peerFns.forEach(fn => fn({ peers: list }));
+    });
+    ch.on('broadcast', { event: '*' }, m => (topics[m.event] || []).forEach(fn => fn({ topic: m.event, data: m.payload })));
+    await new Promise((res, rej) => ch.subscribe(st => { if (st === 'SUBSCRIBED') { ch.track({ user: me, name: myName }); res(); } else if (st === 'CHANNEL_ERROR' || st === 'TIMED_OUT') rej(st); }));
+    return {
+      peers: () => list,
+      onPeers: fn => { peerFns.push(fn); return () => {}; },
+      on: (t, fn) => { (topics[t] ||= []).push(fn); return () => {}; },
+      emit: (t, data) => ch.send({ type: 'broadcast', event: t, payload: data }),
+      leave: () => sb.removeChannel(ch),
+    };
+  } };
+}
+/* sign in with a link sent to your email (works for you and for friends) */
+function signIn(sb){
+  return new Promise(resolve => {
+    const c = document.createElement('div'); c.className = 'card pad'; c.id = 'signin';
+    c.innerHTML = `<div>carrier bag</div><input type="email" id="em" placeholder="your email" aria-label="Email" autocomplete="email">
+      <div class="row"><button class="go" data-a="send">send me a link</button></div><div class="soft" id="emNote">we email you a link · open it here to come in</div>`;
+    document.body.appendChild(c);
+    const go = async () => {
+      const email = $('#em').value.trim(); if (!email) return $('#em').focus();
+      const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.href } });
+      $('#emNote').textContent = error ? error.message : 'sent · check your email and open the link';
+    };
+    c.addEventListener('click', e => { if (e.target.dataset.a === 'send') go(); });
+    $('#em').addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+    sb.auth.onAuthStateChange((ev, session) => { if (session) { c.remove(); resolve(session); } });
+  });
+}
+function loadScript(src){ return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s); }); }
+
+/* =================== state =================== */
+const T = { days: 0, tabs: false, fake: false };   // test panel, never saved
+const seen = () => now() + T.days * DAY;
+let canUpload = true;
+const ownsBag = b => !!b && (store?.kind === 'local' || !b.owner || b.owner === me);
+let store, bags = {}, curId = null, me = null, canEdit = true, room = null, live = null, userNS = null, startedEmpty = false;
+const cur = () => bags[curId];
+const flowersOf = b => Object.values(b?.flowers || {});
+
+/* =================== the pixel world =================== */
+const cv = $('#cv'), cx = cv.getContext('2d');
+let S = 5, LW = 0, LH = 0, ground = [];           // S = screen pixels per world pixel
+const MAXH = 150;                                   // longest stem we ever draw, in world pixels
+const SAND = ['#d4a96a', '#c99c5c', '#dcb57a'], WEAVE = ['#b0814e', '#94683a'], RIM = '#741b47';
+const STEM = '#3f6b4a', LEAF = '#4f8a5a', DEAD = '#8d8565', DEADBLOOM = '#9b7f6a';
+// nine colors, built around plum #741b47 and yellow #f1c232; a drawing stores each pixel as one of these digits
+const PALETTE = ['#741b47', '#f1c232', '#c27ba0', '#e69138', '#8e7cc3', '#e06666', '#6fa8dc', '#fff2cc', '#4c1130'];
+const PAIRS = [[0, 2, 1], [1, 3, 0], [4, 6, 1], [5, 0, 7], [6, 4, 7], [3, 1, 8], [2, 0, 1], [8, 4, 1]];   // petal, second petal, center: every flower gets its own
+const HEADS = [ // little dithered blossoms, like sandspiel / the reference: X petal, x second petal color, o center
+  ['.X.X.', 'XxXxX', '.XoX.', 'XxXxX', '.X.X.'],
+  ['.XX.', 'XxxX', 'XxxX', '.XX.'],
+  ['X.X', '.o.', 'X.X'],
+  ['X...X', 'XX.XX', '.XxX.', '..X..'],
+  ['.x.', 'xXx', '.x.'],
+];
+
+function resize(){
+  S = innerWidth < 600 ? 4 : 5;
+  LW = Math.ceil(innerWidth / S); LH = Math.ceil(innerHeight / S);
+  cv.width = LW; cv.height = LH; cv.style.width = LW * S + 'px'; cv.style.height = LH * S + 'px';
+  const r = rng('ground'); const base = LH - 13; ground = [];
+  let h = 0; for (let x = 0; x < LW; x++) { if (r() < .25) h = clamp(h + (r() < .5 ? -1 : 1), -2, 2); ground.push(base + h); }
+  pile.clear(); flakes.length = 0;
+  layoutHint();
+}
+
+/* each flower's shape is fixed by its id; its height comes from plays; withering bends and fades it */
+const shapes = new Map();
+function shape(f){
+  if (shapes.has(f.id)) return shapes.get(f.id);
+  const r = rng(f.id), n = 1, stems = [];   // one recording = one stem, one blossom
+  for (let i = 0; i < n; i++) {
+    const lean = r() < .5 ? -1 : 1, path = [0]; let x = Math.round((i - (n - 1) / 2) * 3 + (r() - .5) * 2);
+    path[0] = x;
+    for (let y = 1; y < MAXH; y++) { if (r() < .28) x += (r() < .7 ? lean : -lean); path.push(x); }
+    const leaves = []; for (let at = 3 + Math.floor(r() * 5); at < MAXH; at += 7 + Math.floor(r() * 8)) leaves.push({ at, side: r() < .5 ? -1 : 1 });
+    stems.push({ path, leaves, len: .65 + r() * .35 });
+  }
+  const s = { stems, side: r() < .5 ? -1 : 1 };
+  shapes.set(f.id, s); return s;
+}
+const witherOf = f => clamp(((seen() - (f.lastPlayed || f.added)) / DAY - 3) / 11, 0, 1);   // 3 days fine … 14 days gone
+const tallest = () => Math.min(MAXH, LH - 40);
+const targetH = f => Math.round(clamp(7 + 9 * Math.sqrt(f.plays || 0), 7, tallest()) * (1 - .3 * witherOf(f)));   // 1 play 16px, 4 → 25, 20 → 47, 100 → 97
+const shown = new Map();                            // animated height, grows 1 pixel at a time
+const baseX = f => Math.round(6 + f.x * (LW - 12));
+function mix(a, b, t){ const p = s => [1, 3, 5].map(i => parseInt(s.slice(i, i + 2), 16)); const A = p(a), B = p(b);
+  return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * t).toString(16).padStart(2, '0')).join(''); }
+
+/* falling things: withered petals drop into the sand (and stay), playing flowers give off little sparks */
+const pile = new Map(), flakes = [];
+const px = (x, y, c) => { cx.fillStyle = c; cx.fillRect(Math.round(x), Math.round(y), 1, 1); };
+
+/* blossoms: a grid of palette digits ('.' = empty). Drawn by you (f.draw), or made from a pattern. */
+function colorsOf(f){
+  if (Array.isArray(f.color)) return f.color;
+  const fs = flowersOf(cur()).sort((a, b) => (a.added || 0) - (b.added || 0) || (a.id < b.id ? -1 : 1));
+  return PAIRS[Math.max(0, fs.findIndex(x => x.id === f.id)) % PAIRS.length];   // older flowers: spread across the colors in order
+}
+function patternGrid(pat, [p, q, c]){ return pat.map(row => [...row].map(ch => ch === 'X' ? p : ch === 'x' ? q : ch === 'o' ? c : '.').join('')); }
+function generatedGrid(f, small){
+  const n = hash(f.id), pat = small ? [HEADS[2], HEADS[4]][n % 2] : [HEADS[0], HEADS[1], HEADS[3]][n % 3];
+  return patternGrid(pat, colorsOf(f));
+}
+const blossoms = new Map();
+function blossomOf(f){
+  const small = !f.draw && (f.plays || 0) < 3, key = f.id + (f.draw ? f.draw.join('') : small ? 's' : 'b') + (f.color || '');
+  if (blossoms.get(f.id)?.key === key) return blossoms.get(f.id);
+  let rows = f.draw && f.draw.some(r => /[0-9]/.test(r)) ? f.draw : generatedGrid(f, small);
+  // trim empty edges so the drawing sits right on its stem
+  let t = 0, b = rows.length - 1; while (t < b && !/[0-9]/.test(rows[t])) t++; while (b > t && !/[0-9]/.test(rows[b])) b--;
+  rows = rows.slice(t, b + 1);
+  let l = 99, r = -1; rows.forEach(row => [...row].forEach((ch, i) => { if (ch !== '.') { l = Math.min(l, i); r = Math.max(r, i); } }));
+  rows = rows.map(row => row.slice(l, r + 1));
+  const g = { key, rows, cx: (r - l) / 2 };
+  blossoms.set(f.id, g); return g;
+}
+
+function drawFlower(f, t, alpha){
+  const s = shape(f), w = witherOf(f), bx = baseX(f), gy = ground[clamp(bx, 0, LW - 1)];
+  let h = shown.get(f.id) ?? 0; const target = targetH(f), isPlay = voices.has(f.id);
+  if (h !== target && (t % (isPlay ? 6 : 2) === 0)) { h += Math.sign(target - h); shown.set(f.id, h); }   // grow (or shrink) one pixel
+  cx.globalAlpha = alpha;
+  const stemC = mix(STEM, DEAD, w), leafC = mix(LEAF, DEAD, w);
+  let top = gy;
+  for (const st of s.stems) {
+    const L = Math.max(1, Math.round(h * st.len));
+    let hx = 0, hy = 0;
+    for (let i = 0; i < L; i++) {
+      const bend = Math.round(w * 7 * (i / L) ** 2) * s.side;          // withering bends the top over
+      const x = bx + st.path[i] + bend, y = gy - 1 - i + Math.round(w * 3 * (i / L) ** 3);
+      px(x, y, stemC); hx = x; hy = y;
+      for (const lf of st.leaves) if (lf.at === i && i < L - 3) { px(x + lf.side, y, leafC); px(x + 2 * lf.side, y - 1, leafC); }
+    }
+    if (h >= 5) { // the blossom: your drawing, or a generated one in this flower's own colors
+      const g = blossomOf(f), k = (f.plays || 0) >= 15 ? 2 : 1, r = rng(f.id + 'petals');
+      const ox = hx - Math.round(g.cx * k), oy = hy - (g.rows.length - 1) * k;
+      let firstC = null;
+      g.rows.forEach((row, j) => [...row].forEach((ch, i) => {
+        if (ch === '.') return;
+        if (w > .55 && r() < (w - .45)) return;                            // petals gone
+        let c = mix(PALETTE[+ch] || PALETTE[0], DEADBLOOM, w); firstC ||= c;
+        if (isPlay && Math.random() < .12) c = '#ffffff';                  // twinkle while it sounds
+        for (let a = 0; a < k; a++) for (let d = 0; d < k; d++) px(ox + i * k + a, oy + j * k + d, c);
+      }));
+      top = Math.min(top, oy);
+      if (w > .4 && Math.random() < .004 * w) flakes.push({ x: hx, y: hy, c: firstC || DEADBLOOM, fall: true });
+      if (isPlay && Math.random() < .18) flakes.push({ x: hx + Math.round((Math.random() - .5) * 6), y: oy - 1, c: Math.random() < .5 ? '#f1c232' : '#741b47', life: 18 + Math.random() * 14 });
+    }
+    top = Math.min(top, hy);
+  }
+  cx.globalAlpha = 1;
+  return { bx, top, gy };
+}
+
+let tick = 0, boxes = [];
+function frame(){
+  tick++;
+  cx.fillStyle = '#f2e6e6'; cx.fillRect(0, 0, LW, LH);
+  const b = cur(), closed = !!b?.shared && !together();
+  boxes = flowersOf(b).sort((a, c) => a.x - c.x).map(f => ({ f, ...drawFlower(f, tick, closed ? .45 : 1) }));
+  // sand, then the basket band under it
+  const r = rng('sand');
+  for (let x = 0; x < LW; x++) for (let y = ground[x]; y < LH; y++) {
+    const fromBottom = LH - y;
+    if (fromBottom <= 7) { const row = Math.floor((LH - y - 1) / 2), c = Math.floor((x + row * 2) / 4) % 2; px(x, y, fromBottom === 7 ? RIM : WEAVE[c]); }
+    else px(x, y, SAND[Math.floor(r() * 3)]);
+  }
+  for (const [k, c] of pile) { const [x, y] = k.split(',').map(Number); px(x, y, c); }
+  // flakes
+  for (let i = flakes.length - 1; i >= 0; i--) {
+    const p = flakes[i];
+    if (p.fall) {
+      if (tick % 2) { const nx = p.x + (Math.random() < .3 ? (Math.random() < .5 ? -1 : 1) : 0), ny = p.y + 1;
+        const floor = ground[clamp(nx, 0, LW - 1)];
+        if (ny >= floor || pile.has(nx + ',' + ny)) { // land, sand-style: slide off a peak
+          let lx = p.x, ly = p.y; for (const d of [0, -1, 1]) { const k = (p.x + d) + ',' + (p.y + 1); if (!pile.has(k) && p.y + 1 < ground[clamp(p.x + d, 0, LW - 1)]) { lx = p.x + d; ly = p.y + 1; break; } }
+          if (ly === p.y || ly + 1 >= ground[clamp(lx, 0, LW - 1)] || pile.has(lx + ',' + (ly + 1))) { if (pile.size < 900) pile.set(lx + ',' + ly, p.c); flakes.splice(i, 1); continue; }
+          p.x = lx; p.y = ly;
+        } else { p.x = nx; p.y = ny; }
+      }
+      px(p.x, p.y, p.c);
+    } else {
+      if (tick % 3 === 0) { p.y -= 1; if (Math.random() < .3) p.x += Math.random() < .5 ? -1 : 1; }
+      if (--p.life <= 0) { flakes.splice(i, 1); continue; }
+      cx.globalAlpha = clamp(p.life / 12, 0, 1); px(p.x, p.y, p.c); cx.globalAlpha = 1;
+    }
+  }
+  if (flakes.length > 300) flakes.splice(0, flakes.length - 300);
+  placeLabel();
+  requestAnimationFrame(frame);
+}
+
+/* picking: the nearest flower whose column you tapped */
+function pick(clientX, clientY){
+  const x = clientX / S, y = clientY / S; let best = null, d = 1e9;
+  for (const bx of boxes) { const dx = Math.abs(x - bx.bx); if (dx <= 7 && y >= bx.top - 5 && y <= bx.gy + 1 && dx < d) { d = dx; best = bx.f; } }
+  return best;
+}
+let hover = null;
+function placeLabel(){
+  const l = $('#label'), f = hover || (lastStarted && cur()?.flowers?.[lastStarted]);
+  const bx = f && boxes.find(b => b.f.id === f.id);
+  if (!bx) { l.hidden = true; return; }
+  l.textContent = f.name; l.hidden = false;
+  const half = Math.min(l.offsetWidth, innerWidth - 24) / 2;
+  l.style.left = clamp(bx.bx * S, 12 + half, innerWidth - 12 - half) + 'px'; l.style.top = (bx.top - 3) * S + 'px';
+}
+function layoutHint(){ $('#hint').style.top = (LH - 26) * S + 'px'; }
+
+/* =================== tabs, who's here =================== */
+function render(){
+  const list = Object.values(bags).sort((a, b2) => (a.created || 0) - (b2.created || 0));
+  $('#bags').innerHTML = list.map(x => `<button class="tab" data-bag="${x.id}" aria-current="${x.id === curId}"></button>`).join('')
+    + (canUpload ? `<button class="tab" data-act="newbag" aria-label="New basket">+</button>` : '');
+  list.forEach(x => { const t = $(`[data-bag="${x.id}"]`); t.textContent = x.name || 'basket'; if (x.shared) t.insertAdjacentHTML('beforeend', '<span class="two" title="shared">∘∘</span>'); });
+  const canAddHere = !!cur() && canUpload && (ownsBag(cur()) || cur().shared);
+  $('#add').hidden = !canAddHere;
+  $('#share').hidden = !(store?.shares && ownsBag(cur()));
+  $('#hint').hidden = !(canAddHere && !flowersOf(cur()).length);
+  renderHere();
+}
+function peopleHere(){
+  const m = new Map();
+  if (live) live.peers().forEach(p => { if (p.kind !== 'viewer') return; const k = T.tabs ? p.peer : (p.by || p.peer); if (!m.has(k)) m.set(k, p); });
+  else m.set('me', { isMe: true, by: null, peer: 'me' });
+  if (T.fake) m.set('pretend', { isMe: false, by: null, peer: 'pretend', pretend: true });
+  return [...m.values()];
+}
+const together = () => !cur()?.shared || peopleHere().length >= 2;
+async function renderHere(){
+  const b = cur(), h = $('#here');
+  if (!b?.shared) { h.innerHTML = ''; return; }
+  const ps = peopleHere(); const ids = ps.map(p => p.by).filter(Boolean);
+  const prof = userNS && ids.length ? await userNS.profiles(ids) : {};
+  h.innerHTML = '';
+  ps.slice(0, 6).forEach(p => { const d = document.createElement('div'); d.className = 'dot';
+    const pr = p.by && prof[p.by]; if (pr?.avatarUrl) { const i = new Image(); i.src = pr.avatarUrl; i.alt = pr.name || ''; d.appendChild(i); }
+    if (!pr?.avatarUrl && p.name) { d.textContent = p.name[0].toUpperCase(); d.style.cssText += 'display:grid;place-items:center;font-size:13px'; }
+    d.title = pr?.name || p.name || (p.isMe ? 'you' : p.pretend ? 'pretend friend' : 'someone'); if (p.pretend) d.style.background = 'var(--blue)'; h.appendChild(d); });
+  if (ps.length < 2) { const d = document.createElement('div'); d.className = 'dot empty'; d.title = 'waiting for someone'; h.appendChild(d); }
+}
+let roomKey = null;
+async function joinRoomFor(b){
+  const key = b?.shared ? b.id : null;
+  if (key === roomKey) { renderHere(); return; }
+  roomKey = key;
+  if (live) { const old = live; live = null; old.leave?.().catch(() => {}); }
+  if (!room || !key) { renderHere(); return; }
+  try {
+    const r = await room.join('b-' + b.id.toLowerCase().replace(/[^a-z0-9]/g, ''));
+    if (roomKey !== b.id) { r.leave(); return; }
+    live = r;
+    r.onPeers(() => { renderHere(); if (voices.size && !together()) stopAll(); });
+    renderHere();
+    r.on('play', m => { const d = m.data || {}; if (typeof d.fid === 'string') startPlay(d.fid, Number(d.at) || now()); });
+    r.on('stop', m => { const d = m.data || {}; typeof d.fid === 'string' ? stopOne(d.fid) : stopAll(); });
+  } catch { roomKey = null; say('can’t connect to listen together right now'); }
+  renderHere();
+}
+
+/* =================== listening =================== */
+/* every flower is its own voice: tap to start it, tap again to stop it. Tap several and they sound together. */
+const voices = new Map();            // fid -> { audio, t, at }
+let lastStarted = null;
+const realPeople = () => live ? new Set(live.peers().filter(p => p.kind === 'viewer').map(p => T.tabs ? p.peer : (p.by || p.peer))).size : 1;
+function tap(f){
+  const b = cur(); if (!b) return;
+  const playingIt = voices.has(f.id);
+  if (b.shared) {
+    if (!playingIt && !together()) return say('waiting for someone to join you');
+    if (live && realPeople() >= 2) { live.emit(playingIt ? 'stop' : 'play', { fid: f.id, at: now() + 700 }).catch(() => say('only people who can use this basket can start a sound')); }
+    else (playingIt ? stopOne(f.id) : startPlay(f.id, now()));       // only the pretend friend is here
+  } else (playingIt ? stopOne(f.id) : startPlay(f.id, now()));
+  if (playingIt) return;
+  const plays = (f.plays || 0) + 1;                 // one count per start, for everyone
+  f.plays = plays; f.lastPlayed = now();
+  Promise.resolve(store.countPlay ? store.countPlay(b, f.id) : store.patchFlower(b, f.id, { plays, lastPlayed: f.lastPlayed })).catch(() => {});
+}
+async function startPlay(fid, at){
+  const f = cur()?.flowers?.[fid]; if (!f || voices.has(fid)) return;
+  const v = { audio: new Audio(), t: null, at }; voices.set(fid, v); lastStarted = fid;
+  f.lastPlayed = Math.max(f.lastPlayed || 0, now());
+  const src = await store.audioSrc(f);
+  if (voices.get(fid) !== v) return;
+  if (!src) { say('this recording isn’t here'); return stopOne(fid); }
+  v.audio.src = src;
+  v.audio.onended = () => { if (voices.get(fid) === v) stopOne(fid); };
+  v.t = setTimeout(() => v.audio.play().catch(() => { v.blocked = true; say('tap anywhere to hear it'); }), Math.max(0, at - now()));
+}
+function stopOne(fid){ const v = voices.get(fid); if (!v) return; clearTimeout(v.t); v.audio.pause(); voices.delete(fid); if (lastStarted === fid) lastStarted = [...voices.keys()].pop() || null; }
+function stopAll(){ [...voices.keys()].forEach(stopOne); }
+/* browsers only allow sound after a tap: if a friend started something before you touched the page, catch up on your first tap */
+document.addEventListener('pointerdown', () => {
+  voices.forEach(v => { if (v.blocked) { v.blocked = false; try { v.audio.currentTime = Math.max(0, (now() - v.at) / 1000); } catch {} v.audio.play().catch(() => {}); } });
+}, true);
+let sayT;
+function say(t, stay, ms = 2800){ const w = $('#words'); w.textContent = t; w.hidden = false; clearTimeout(sayT); if (!stay) sayT = setTimeout(() => w.hidden = true, ms); }
+$('#share').addEventListener('click', () => { const t = $(`[data-bag="${curId}"]`); if (!t) return; editBag(t); $('#card [data-a=send]')?.click(); });
+
+/* =================== adding recordings =================== */
+function openSpot(b){
+  const xs = flowersOf(b).map(f => f.x).concat([-.06, 1.06]).sort((a, c) => a - c); let best = .5, gap = 0;
+  for (let i = 1; i < xs.length; i++) if (xs[i] - xs[i - 1] > gap) { gap = xs[i] - xs[i - 1]; best = (xs[i] + xs[i - 1]) / 2; }
+  return clamp(best + (Math.random() - .5) * gap * .3, .02, .98);   // not quite even: no order to it
+}
+function leastUsedColors(b){
+  const n = PAIRS.map(() => 0); flowersOf(b).forEach(f => { const i = PAIRS.findIndex(p => p.join() === colorsOf(f).join()); if (i >= 0) n[i]++; });
+  const min = Math.min(...n), opts = n.map((v, i) => v === min ? i : -1).filter(i => i >= 0);
+  return PAIRS[opts[Math.floor(Math.random() * opts.length)]];
+}
+async function addFiles(files){
+  const b = cur(); if (!b) return;
+  files = files.filter(f => f.type.startsWith('audio/') || f.type.startsWith('video/') || /\.(m4a|mp3|wav|ogg|aac|flac|webm|opus|mp4)$/i.test(f.name));
+  if (!files.length) return;
+  // 1. draw (or keep) a blossom for each recording
+  const plan = []; let rest = false;
+  for (const [i, file] of files.entries()) {
+    const color = leastUsedColors({ flowers: Object.fromEntries([...flowersOf(b), ...plan].map(f => [f.id, f])) });
+    const f = { id: uid(), name: file.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim(), color, plays: 0, lastPlayed: now(), added: now() + i, by: me };
+    if (!rest) {
+      const res = await drawPad({ name: f.name, grid: centerGrid(patternGrid(HEADS[0], color)), step: files.length > 1 ? `${i + 1} of ${files.length}` : '', more: files.length - i - 1 });
+      if (!res) { if (!plan.length) return; break; }       // closed: plant what's drawn so far
+      f.name = res.name || f.name; if (res.draw) f.draw = res.draw; rest = res.rest;
+    }
+    plan.push({ ...f, file });
+  }
+  // 2. plant them
+  $('#add').classList.add('busy');
+  let done = 0, failed = [];
+  for (const [i, p] of plan.entries()) {
+    const { file, ...f } = p; f.x = openSpot(b);
+    const tag = plan.length > 1 ? `${i + 1} of ${plan.length}` : '';
+    say(`planting ${tag} …`, true);
+    try {
+      Object.assign(f, await store.putAudio(file, f.id, (k, n) => say(`planting ${tag} · big file, piece ${k} of ${n} …`, true)));
+      b.flowers = { ...(b.flowers || {}), [f.id]: f };
+      await store.addFlower(b, f); done++;
+      render();
+    } catch (e) { failed.push(`${file.name}${e?.code === 'quota_or_state' ? ' (storage is full)' : e?.code === 'unsupported_type' ? ' (try it as .m4a)' : ''}`); }
+  }
+  $('#add').classList.remove('busy'); render();
+  say(failed.length ? `planted ${done} · couldn’t add: ${failed.join(', ')}` : `planted ${done} ${done === 1 ? 'flower' : 'flowers'}`, false, failed.length ? 9000 : 2800);
+}
+
+/* the drawing pad: 9×9 pixels. Starts with a blossom so you can keep it, change it, or wipe it and draw your own. */
+const PAD = 9;
+function centerGrid(pg){ const top = Math.max(0, Math.floor((PAD - pg.length) / 2)), left = Math.max(0, Math.floor((PAD - (pg[0]?.length || 0)) / 2));
+  return Array.from({ length: PAD }, (_, j) => Array.from({ length: PAD }, (_, i) => pg[j - top]?.[i - left] ?? '.').join('')); }
+function drawPad({ name, grid, step, more, edit }){
+  return new Promise(resolve => {
+    closeCard();
+    const c = document.createElement('div'); c.className = 'card pad'; c.id = 'card';
+    c.setAttribute('role', 'dialog'); c.setAttribute('aria-label', 'Draw its flower');
+    c.innerHTML = `${step ? `<div class="step">${step}</div>` : ''}
+      <input type="text" id="padName" aria-label="Name">
+      <canvas id="padCv" width="${PAD}" height="${PAD}" aria-label="Drawing pad, 9 by 9 pixels"></canvas>
+      <div class="sw" id="sw">${PALETTE.map((col, i) => `<button data-c="${i}" style="background:${col}" aria-label="color ${i + 1}" aria-pressed="${i === 0}"></button>`).join('')}<button class="eraser" data-c="." aria-label="eraser" aria-pressed="false"></button></div>
+      <div class="row"><button data-a="clear">clear</button><button data-a="surprise">surprise me</button></div>
+      <div class="row"><button class="go" data-a="plant">${edit ? 'done' : 'plant'}</button>${more ? `<button data-a="rest">plant the other ${more} as they are</button>` : ''}<button data-a="x">cancel</button></div>`;
+    document.body.appendChild(c);
+    const nm = $('#padName'); nm.value = name;
+    let g = (grid || []).slice(0, PAD).map(r => (r + '.'.repeat(PAD)).slice(0, PAD)); while (g.length < PAD) g.push('.'.repeat(PAD));
+    g = g.map(r => [...r]);
+    const pc = $('#padCv'), x = pc.getContext('2d');
+    const paint = () => { x.clearRect(0, 0, PAD, PAD); g.forEach((row, j) => row.forEach((ch, i) => { if (ch !== '.') { x.fillStyle = PALETTE[+ch]; x.fillRect(i, j, 1, 1); } })); };
+    paint();
+    let colr = '0', stroke = null;
+    c.querySelector('#sw').addEventListener('click', e => { const b = e.target.closest('[data-c]'); if (!b) return; colr = b.dataset.c; c.querySelectorAll('#sw button').forEach(o => o.setAttribute('aria-pressed', String(o === b))); });
+    const cell = e => { const r = pc.getBoundingClientRect(); return [Math.floor((e.clientX - r.left) / r.width * PAD), Math.floor((e.clientY - r.top) / r.height * PAD)]; };
+    const put = (i, j) => { if (i < 0 || j < 0 || i >= PAD || j >= PAD) return; g[j][i] = stroke; paint(); };
+    pc.addEventListener('pointerdown', e => { pc.setPointerCapture(e.pointerId); const [i, j] = cell(e);
+      stroke = colr !== '.' && g[j]?.[i] === colr ? '.' : colr;   // tapping a pixel of the same color clears it
+      put(i, j); });
+    pc.addEventListener('pointermove', e => { if (stroke !== null) put(...cell(e)); });
+    pc.addEventListener('pointerup', () => stroke = null);
+    const finish = v => { c.remove(); resolve(v); };
+    const out = () => g.map(r => r.join(''));
+    c.addEventListener('click', e => {
+      const a = e.target.dataset.a; if (!a) return;
+      if (a === 'clear') { g = g.map(r => r.map(() => '.')); paint(); }
+      if (a === 'surprise') { const pair = PAIRS[Math.floor(Math.random() * PAIRS.length)], pat = [HEADS[0], HEADS[1], HEADS[3]][Math.floor(Math.random() * 3)];
+        const pg = patternGrid(pat, pair), top = Math.floor((PAD - pg.length) / 2), left = Math.floor((PAD - pg[0].length) / 2);
+        g = g.map(r => r.map(() => '.')); pg.forEach((row, j) => [...row].forEach((ch, i) => g[top + j][left + i] = ch)); paint(); }
+      if (a === 'plant' || a === 'rest') { const d = out(); finish({ name: nm.value.trim(), draw: d.some(r => /[0-9]/.test(r)) ? d : null, rest: a === 'rest' }); }
+      if (a === 'x') finish(null);
+    });
+    c.addEventListener('keydown', e => { if (e.key === 'Escape') finish(null); });
+    nm.focus();
+  });
+}
+$('#fileIn').addEventListener('change', e => { addFiles([...e.target.files]); e.target.value = ''; });
+document.addEventListener('dragover', e => e.preventDefault());
+document.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer?.files?.length && !$('#add').hidden) addFiles([...e.dataTransfer.files]); });
+
+/* =================== tap, hold =================== */
+let downOn = null, hold = null, held = false;
+cv.addEventListener('pointermove', e => { hover = pick(e.clientX, e.clientY); cv.classList.toggle('over', !!hover); });
+cv.addEventListener('pointerleave', () => { hover = null; });
+cv.addEventListener('pointerdown', e => { const f = downOn = pick(e.clientX, e.clientY); if (!f) { closeCard(); return; } held = false;
+  hold = setTimeout(() => { held = true; editFlower(f.id, e.clientX, e.clientY); }, 550); });
+['pointerup', 'pointerleave', 'pointercancel'].forEach(t => cv.addEventListener(t, () => clearTimeout(hold)));
+cv.addEventListener('click', () => { const f = downOn; downOn = null; if (!f || held) return; closeCard(); const fl = cur()?.flowers?.[f.id]; if (fl) tap(fl); });
+cv.addEventListener('contextmenu', e => { const f = pick(e.clientX, e.clientY); if (!f) return; e.preventDefault(); editFlower(f.id, e.clientX, e.clientY); });
+// keyboard: left/right to move between flowers, enter to play, e to edit
+let kIdx = -1;
+document.addEventListener('keydown', e => {
+  if (e.target.closest('input,.card') || $('.card.pad')) return;
+  const fs = boxes.map(b => b.f); if (!fs.length) return;
+  if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { kIdx = (kIdx + (e.key === 'ArrowRight' ? 1 : -1) + fs.length) % fs.length; hover = fs[kIdx]; }
+  if ((e.key === 'Enter' || e.key === ' ') && hover) { e.preventDefault(); tap(hover); }
+  if (e.key === 'e' && hover) { const bx = boxes.find(b => b.f.id === hover.id); editFlower(hover.id, bx.bx * S, bx.top * S); }
+});
+
+/* =================== small cards =================== */
+function card(x, y, html){
+  closeCard(); const c = document.createElement('div'); c.className = 'card'; c.id = 'card';
+  c.style.left = clamp(x - 125, 16, innerWidth - 266) + 'px'; c.style.top = clamp(y, 16, innerHeight - 220) + 'px';
+  c.innerHTML = html; document.body.appendChild(c); return c;
+}
+function closeCard(){ $('#card')?.remove(); }
+function editFlower(fid, x, y){
+  const b = cur(), f = b?.flowers?.[fid]; if (!f || !(ownsBag(b) || (f.by && f.by === me))) return;
+  const c = card(x, y - 110, `<input type="text" id="nameIn" aria-label="Name"><div class="row"><button data-a="done">done</button><button data-a="draw">redraw flower</button><button class="bye" data-a="out">take out</button></div>`);
+  const inp = $('#nameIn'); inp.value = f.name; inp.focus(); inp.select();
+  let t; inp.addEventListener('input', () => { f.name = inp.value; clearTimeout(t); t = setTimeout(() => store.patchFlower(b, fid, { name: f.name }), 500); });
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === 'Escape') closeCard(); });
+  c.addEventListener('click', async e => {
+    const a = e.target.dataset.a;
+    if (a === 'done') closeCard();
+    if (a === 'draw') {
+      const grid = centerGrid(blossomOf(f).rows);
+      const res = await drawPad({ name: f.name, grid, edit: true });
+      if (res) { f.name = res.name || f.name; f.draw = res.draw; blossoms.delete(fid); await store.patchFlower(b, fid, { name: f.name, draw: res.draw }); }
+    }
+    if (a === 'out') { stopOne(fid); closeCard(); delete b.flowers[fid]; render(); await store.removeFlower({ ...b, flowers: { ...b.flowers, [fid]: f } }, fid); }
+  });
+}
+function editBag(btn){
+  const b = cur(); if (!b) return;
+  const r = btn.getBoundingClientRect(), owner = ownsBag(b);
+  const c = card(r.left + 125, r.bottom + 8, `
+    ${owner ? `<input type="text" id="bagName" aria-label="Basket name">` : `<div id="bagNameRO"></div>`}
+    ${store.shares && owner ? `<div class="row"><button data-a="private" class="${b.shared ? '' : 'on'}">just me</button><button data-a="share" class="${b.shared ? 'on' : ''}">listen together</button></div>` : ''}
+    ${store.shares ? `<div class="row"><button data-a="send">send to a friend</button></div>` : ''}
+    <div id="sendSteps" hidden class="soft"></div>
+    ${b.shared ? `<div class="soft">plays only when two of you are here</div>` : ''}
+    ${owner ? `<div class="row"><button data-a="done">done</button><button class="bye" data-a="del">throw away</button></div>` : ''}`);
+  if (owner) { const inp = $('#bagName'); inp.value = b.name || ''; let t; inp.addEventListener('input', () => { b.name = inp.value; $(`[data-bag="${b.id}"]`).firstChild.textContent = b.name; clearTimeout(t); t = setTimeout(() => store.rename(b, b.name), 500); });
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === 'Escape') closeCard(); }); }
+  else $('#bagNameRO').textContent = b.name || 'basket';
+  c.addEventListener('click', async e => {
+    const a = e.target.dataset.a; if (!a) return;
+    if (a === 'done') closeCard();
+    if (a === 'share' && !b.shared) { closeCard(); await store.setShared(b, true); say('shared · copy its link for a friend'); }
+    if (a === 'private' && b.shared) { closeCard(); await store.setShared(b, false); }
+    if (a === 'send') {
+      const url = location.href.split('#')[0] + '#b-' + b.id;
+      let copied = false; try { await navigator.clipboard.writeText(url); copied = true; } catch {}
+      if (!b.shared && ownsBag(b)) await store.setShared(b, true);
+      const st = $('#sendSteps'); st.hidden = false;
+      st.innerHTML = `${copied ? 'link copied.' : 'copy this link:'} <span style="user-select:all;word-break:break-all;color:var(--ink)"></span><br>
+        ${store.kind === 'cloud' ? '1. open <b>Share</b> at the top of this page and add your friend as <b>Contributor</b><br>2. send them the link<br>' : 'send them the link · they sign in with their email<br>'}it plays when you're both here, and they can add sounds too.`;
+      st.querySelector('span').textContent = copied ? '' : url;
+      e.target.textContent = 'sent ✓';
+    }
+    if (a === 'del') { if (e.target.dataset.sure) { closeCard(); await store.deleteBag(b); curId = null; } else { e.target.dataset.sure = '1'; e.target.textContent = 'tap again to throw away'; } }
+  });
+}
+document.addEventListener('click', async e => {
+  const t = e.target.closest('.tab'); if (!t) return;
+  if (t.dataset.act === 'newbag') { const id = await store.createBag('basket ' + (Object.keys(bags).length + 1)); go(id); return; }
+  if (t.dataset.bag === curId) editBag(t); else go(t.dataset.bag);
+});
+function go(id){
+  if (id === curId) return;
+  stopAll(); closeCard(); curId = id; shapes.clear(); shown.clear(); pile.clear(); flakes.length = 0;
+  try { history.replaceState(null, '', '#b-' + id); } catch {}
+  render(); joinRoomFor(cur());
+}
+
+/* =================== test panel =================== */
+$('#testbtn').addEventListener('click', () => { const p = $('#test'); p.hidden = !p.hidden; $('#testbtn').classList.toggle('on', !p.hidden); $('#testbtn').setAttribute('aria-expanded', String(!p.hidden)); });
+$('#days').addEventListener('input', e => { T.days = +e.target.value; $('#daysOut').textContent = T.days; });
+$('#tabs').addEventListener('change', e => { T.tabs = e.target.checked; renderHere(); });
+$('#fake').addEventListener('change', e => { T.fake = e.target.checked; renderHere(); });
+
+/* =================== start =================== */
+addEventListener('resize', resize); resize(); requestAnimationFrame(frame);
+(async () => {
+  const CFG = window.CARRIER_CONFIG || {};
+  let assets = null;
+  if (CFG.supabaseUrl && CFG.supabaseKey && !/PASTE/.test(CFG.supabaseUrl + CFG.supabaseKey)) {
+    // your own site
+    try { await loadScript('vendor/supabase.js'); } catch { say('couldn’t load vendor/supabase.js'); return; }
+    const sb = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseKey);
+    let { data: { session } } = await sb.auth.getSession();
+    if (!session) session = await signIn(sb);
+    me = session.user.id;
+    store = supabaseBackend(sb, me); room = supabaseRoom(sb, me, (session.user.email || '').split('@')[0]);
+    canUpload = true; canEdit = true; assets = true;
+  } else {
+    const cl = window.claude?.use ? window.claude : null;
+    const [db, as, u, rm] = cl ? await Promise.all(['db', 'assets', 'user', 'room'].map(n => cl.use(n).catch(() => null))) : [null, null, null, null];
+    assets = as; userNS = u; room = rm; me = u ? await u.id() : null;
+    if (db && me) { store = cloudBackend(db, assets, u, me); store.shares = true; canUpload = !!assets; canEdit = await u.canEdit(); }
+    else { store = localBackend(); canUpload = true; canEdit = true; }
+  }
+  let first = true;
+  store.start(async next => {
+    bags = next;
+    if (first) { first = false; const want = (location.hash.match(/^#b-([A-Za-z0-9]+)/) || [])[1]; curId = want && bags[want] ? want : null; }
+    if (!curId || !bags[curId]) {
+      const pickFirst = Object.values(bags).sort((a, b) => (a.shared - b.shared) || (a.created || 0) - (b.created || 0))[0];
+      if (pickFirst) curId = pickFirst.id;
+      else if ((store.kind === 'local' || assets) && !startedEmpty) { startedEmpty = true; curId = await store.createBag('my sound archive'); return; }
+    }
+    render(); joinRoomFor(cur());
+  });
+})();
+addEventListener('hashchange', () => { const id = (location.hash.match(/^#b-([A-Za-z0-9]+)/) || [])[1]; if (id && bags[id]) go(id); });
+</script>
+
+</body></html>
