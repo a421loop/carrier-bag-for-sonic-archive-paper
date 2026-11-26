@@ -1,0 +1,1417 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><script src="config.js"></script></head><body>
+<title>Carrier Bag</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500&display=swap">
+<style>
+/* One screen of pale paper. A basket of sand along the bottom; each recording is a pixel flower.
+   Single look on purpose. Colors: pale pink paper, plum #741b47 + yellow #f1c232 blooms, sand. */
+:root{
+  --paper:#f2e6e6;
+  --ink:#4c1130;          /* deep plum, for the little text there is */
+  --burgundy:#741b47;
+  --blue:#f1c232;
+  --soft:#a58c90;
+  --f-pix:"Pixelify Sans","Courier New",monospace;
+  color-scheme:light;
+}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-pix);font-size:16px;overflow:hidden}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--burgundy);outline-offset:2px}
+#cv{position:fixed;left:0;top:0;image-rendering:pixelated;touch-action:pan-y}
+.edge{position:fixed;bottom:calc(64px + env(safe-area-inset-bottom,0px));z-index:4;background:var(--paper);border:2px solid var(--ink);color:var(--ink);padding:0 6px;font-size:18px;line-height:1.2}
+#edgeL{left:max(12px,env(safe-area-inset-left,0px))} #edgeR{right:max(12px,env(safe-area-inset-right,0px))}
+html,body,button,label,.tab,#cv,#cv.over{cursor:var(--bee,auto)}
+input[type=text],input[type=email],textarea{cursor:text}
+
+.top{position:fixed;left:0;right:0;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;gap:12px;
+  padding-block:calc(10px + env(safe-area-inset-top,0px)) 0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.bags{display:flex;gap:4px 14px;flex-wrap:wrap;align-items:baseline;min-width:0}
+.tab{background:none;border:0;padding:0;cursor:pointer;color:var(--soft);border-bottom:2px solid transparent;white-space:nowrap}
+.tab[aria-current="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+.tab .two{color:var(--burgundy);margin-left:4px}
+.right{display:flex;gap:10px;align-items:center;flex:none}
+.dot{width:20px;height:20px;border:2px solid var(--ink);overflow:hidden;background:var(--paper)}
+.dot img{width:100%;height:100%;object-fit:cover;image-rendering:pixelated}
+.dot.empty{border-style:dashed;border-color:var(--soft)}
+.add{cursor:pointer;color:var(--ink);border:2px solid var(--ink);padding:1px 8px;background:var(--paper);box-shadow:none}
+.add:hover{box-shadow:3px 3px 0 var(--blue)}
+.add input{display:none}
+.add.busy{animation:blink .6s steps(2) infinite}
+@keyframes blink{50%{opacity:.4}}
+
+.label{position:fixed;z-index:4;transform:translate(-50%,-100%);color:var(--burgundy);pointer-events:none;white-space:nowrap;max-width:calc(100vw - 24px);overflow:hidden;text-overflow:ellipsis;
+  background:var(--paper);padding:0 4px}
+.hint{position:fixed;left:50%;transform:translateX(-50%);white-space:nowrap;color:var(--soft);pointer-events:none;z-index:3}
+.words{position:fixed;left:50%;top:calc(52px + env(safe-area-inset-top,0px));transform:translateX(-50%);color:var(--burgundy);text-align:center;
+  max-width:min(520px,calc(100% - 32px));pointer-events:none;z-index:6;background:var(--paper);padding:2px 8px}
+
+.card{position:fixed;z-index:10;background:var(--paper);border:2px solid var(--ink);box-shadow:4px 4px 0 var(--burgundy);padding:10px 12px;
+  display:flex;flex-direction:column;gap:8px;width:250px}
+.card input[type=email],.card input[type=text]{background:#fff8;border:0;border-bottom:2px solid var(--ink);padding:2px 4px;width:100%;font-size:18px}
+.card .row{display:flex;gap:6px 14px;flex-wrap:wrap}
+.card button{background:none;border:0;padding:0;cursor:pointer;border-bottom:2px solid #4c113044}
+.card button.on{border-bottom-color:var(--burgundy);color:var(--burgundy)}
+.card .bye{color:var(--burgundy);border-color:transparent}
+.card .soft{font-size:14px;color:var(--soft)}
+.testbtn{position:fixed;left:max(12px,env(safe-area-inset-left,0px));bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:5;background:var(--paper);border:2px dashed var(--soft);color:var(--soft);cursor:pointer;padding:0 6px;font-size:14px}
+.testbtn.on{border-style:solid;border-color:var(--burgundy);color:var(--burgundy)}
+.test{position:fixed;left:max(12px,env(safe-area-inset-left,0px));bottom:calc(112px + env(safe-area-inset-bottom,0px));z-index:9;width:min(290px,calc(100% - 24px));background:var(--paper);border:2px solid var(--ink);box-shadow:4px 4px 0 var(--blue);padding:10px 12px;display:flex;flex-direction:column;gap:8px;font-size:15px}
+.test label{display:flex;gap:8px;align-items:center;cursor:pointer}
+.test input[type=range]{width:100%;accent-color:var(--burgundy)}
+.test .soft{color:var(--soft);font-size:13px}
+.all{cursor:pointer;color:var(--ink);border:2px solid var(--ink);padding:1px 8px;background:var(--paper);box-shadow:3px 3px 0 var(--burgundy)}
+.all.on{background:var(--burgundy);color:var(--paper)}
+/* the drawing pad */
+.card.pad{left:50%!important;top:50%!important;transform:translate(-50%,-50%);width:min(300px,calc(100vw - 32px))}
+.card.pad .step{font-size:13px;color:var(--soft)}
+#padCv{width:100%;aspect-ratio:1;image-rendering:pixelated;border:2px solid var(--ink);background:#fff8;touch-action:none;cursor:crosshair}
+.sw{display:flex;gap:4px;flex-wrap:wrap}
+.sw button{width:24px;height:24px;border:2px solid transparent!important;padding:0;cursor:pointer}
+.sw button[aria-pressed="true"]{border-color:var(--ink)!important;outline:2px solid var(--paper);outline-offset:-4px}
+.sw .eraser{background:repeating-linear-gradient(45deg,#fff 0 4px,#e6d6d6 4px 8px)}
+.card button.go{background:var(--burgundy);color:var(--paper);padding:1px 10px;border:0}
+.choose{display:flex;gap:10px}
+.choose button,.choose label{flex:1;text-align:center;border:2px solid var(--ink)!important;padding:10px 4px!important;cursor:var(--bee,pointer);background:var(--paper)}
+.choose button:hover,.choose label:hover{box-shadow:3px 3px 0 var(--blue)}
+.choose input{display:none}
+.rec{display:flex;align-items:center;gap:14px}
+.recbtn{width:56px;height:56px;border:3px solid var(--ink)!important;background:var(--paper)!important;display:grid;place-items:center;padding:0!important}
+.recbtn i{display:block;width:26px;height:26px;background:var(--burgundy);border-radius:50%}
+.recbtn.on i{border-radius:0;width:22px;height:22px;animation:blink 1s steps(2) infinite}
+#recT{font-size:22px;font-variant-numeric:tabular-nums}
+/* pollen cards: plain pixel boxes */
+.card.os{width:auto;padding:12px;position:fixed}
+.tiles{display:flex;gap:8px}
+.tile{width:62px;height:62px;display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:5px;border:2px solid var(--ink)!important;background:var(--paper);font-size:13px;padding:0!important;color:var(--ink)}
+.tile:hover,.tile:focus-visible{box-shadow:3px 3px 0 var(--blue);transform:translate(-1px,-1px)}
+.tile input{display:none}
+.tile svg{width:24px;height:24px;image-rendering:pixelated}
+.tile.icon svg{width:28px;height:28px}
+.add.walk{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.add.walk svg{width:12px;height:14px;image-rendering:pixelated;flex:none}
+.xbtn{position:absolute;right:6px;top:6px;width:24px;height:24px;border:0!important;background:none!important;font-size:16px;line-height:24px;padding:0!important;text-align:center;color:var(--ink)}
+.xbtn:hover{color:var(--burgundy)}
+.card:has(> .xbtn){padding-top:32px}
+.card.view{padding:10px;gap:8px;width:min(420px,calc(100vw - 32px))}
+.card.view.wordcard{width:260px}
+.view img,.view video{display:block;width:100%;max-height:60vh;object-fit:contain;border:2px solid var(--ink);image-rendering:auto;background:#fff8}
+.view textarea,.view .words-in{width:100%;min-height:110px;border:0;padding:0 2px;background:repeating-linear-gradient(transparent 0 23px,#5a223026 23px 24px);line-height:24px;font:inherit;font-size:17px;color:var(--ink);resize:none;white-space:pre-wrap;word-break:break-word}
+.view textarea:focus{outline:none}
+.view .foot{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;color:var(--soft)}
+.view .foot button{font-size:13px}
+/* the share box */
+.card.share{left:50%!important;top:50%!important;transform:translate(-50%,-50%);width:min(360px,calc(100vw - 32px));gap:12px;padding:14px}
+.sh-title{font-size:18px;padding-right:20px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sh-opts{display:flex;flex-direction:column;gap:4px}
+.sh-opt{display:flex!important;gap:10px;align-items:flex-start;text-align:left;padding:6px!important;border:2px solid transparent!important}
+.sh-opt:hover{border-color:#5a223033!important}
+.sh-opt[aria-checked="true"]{border-color:var(--ink)!important;box-shadow:3px 3px 0 var(--blue)}
+.sh-opt i{flex:none;width:14px;height:14px;border:2px solid var(--ink);margin-top:3px;background:var(--paper)}
+.sh-opt[aria-checked="true"] i{background:var(--burgundy);box-shadow:inset 0 0 0 2px var(--paper)}
+.sh-opt span{display:flex;flex-direction:column}
+.sh-opt b{font-weight:500}
+.sh-opt small{font-size:13px;color:var(--soft)}
+.sh-link{display:flex;gap:6px}
+.sh-link input{flex:1;font-size:13px!important;color:var(--soft)}
+.sh-link.off{opacity:.5}
+.sh-note{font-size:13px}
+/* the garden: every patch as a seed tray */
+.garden{position:fixed;inset:0;overflow-y:auto;z-index:3;background:var(--paper);
+  padding-block:calc(70px + env(safe-area-inset-top,0px)) 60px;padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px))}
+.trays{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:30px 26px;max-width:1200px;margin:0 auto}
+.tray{display:flex;flex-direction:column;gap:10px;background:none;border:0;padding:0;text-align:center;color:var(--ink)}
+.tray{position:relative;cursor:var(--bee,pointer)}
+.drawedge{background:none;border:0;padding:0;font:inherit;font-size:12px;color:var(--burgundy);text-decoration:underline;cursor:var(--bee,pointer)}
+.tray canvas{width:100%;aspect-ratio:100/64;image-rendering:pixelated;transition:transform .15s}
+.tray:hover canvas,.tray:focus-visible canvas{transform:translate(-2px,-2px)}
+.tray span{font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tray small{display:block;font-size:12px;color:var(--soft);margin-top:-6px}
+.tray .plus{position:absolute;left:0;right:0;top:calc((100% - 40px) * .6);font-size:28px;font-weight:400;color:var(--soft);pointer-events:none}
+.tray.new:hover .plus{color:var(--ink)}
+.card.dig{width:min(420px,calc(100vw - 32px))}
+#digCv{width:100%;aspect-ratio:100/64;image-rendering:pixelated;background:#fff6;border:2px dashed #a58c90;touch-action:none;cursor:crosshair}
+.card button.go:disabled{opacity:.4}
+.gtitle{font-size:20px}
+.tab.back{color:var(--ink)}
+.bags{align-items:center!important}
+.tab.ptab{display:inline-grid;place-items:center;border:0!important;padding:0;color:var(--ink);text-shadow:none}
+.tab.ptab canvas{grid-area:1/1;image-rendering:pixelated;display:block}
+.tab.ptab > .pin{grid-area:1/1;display:flex;align-items:center;gap:6px;white-space:nowrap;padding:0 10px 3px 22px;position:relative}
+.tab.ptab .tclose{display:grid;place-items:center;width:22px;height:22px;font-size:17px;line-height:1;color:var(--ink);opacity:.6;border-radius:0}
+.tab.ptab .tclose:hover{opacity:1;background:#a58c9033}
+.tab.ptab:hover canvas{transform:translateY(-1px)}
+.bags{flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:none}
+.ptab-wrap{display:inline-flex;align-items:center;flex:none;opacity:.5;transition:opacity .15s}
+.ptab-wrap.on,.ptab-wrap:hover{opacity:1}
+</style>
+
+<canvas id="cv" aria-label="Carrier bag of recordings"></canvas>
+<div class="top">
+  <nav class="bags" id="bags" aria-label="Patches"></nav>
+  <div class="right"><div class="right" id="here" aria-label="Who is here"></div>
+    <button class="add" id="add" hidden>+ add</button>
+    <button class="add walk" id="walk" hidden title="walk: listen to the landscape, oldest planted first" aria-label="Walk through the landscape"></button>
+    <button class="add" id="share" hidden>share</button></div>
+</div>
+<main class="garden" id="garden" hidden aria-label="Garden"></main>
+<div class="label" id="label" hidden></div>
+<button class="edge" id="edgeL" hidden aria-label="Scroll the garden left">‹</button><button class="edge" id="edgeR" hidden aria-label="Scroll the garden right">›</button>
+<div class="hint" id="hint" hidden>add a recording to plant it</div>
+<div class="words" id="words" hidden></div>
+<button class="testbtn" id="testbtn" aria-expanded="false">test</button>
+<div class="test" id="test" hidden>
+  <div>days passed: <b id="daysOut">0</b></div>
+  <input type="range" id="days" min="0" max="20" step="1" value="0" aria-label="Days passed">
+  <span class="soft">only on your screen · flowers wither after 3 days, fully at 14</span>
+  <label><input type="checkbox" id="tabs"> count my other tabs as people</label>
+  <label><input type="checkbox" id="fake"> pretend someone is here</label>
+  <label><input type="checkbox" id="buzz" checked> bee buzz</label>
+  <span class="soft">for shared patches (∘∘). open this page in a second tab to try playing together.</span>
+</div>
+
+<script>
+/* Carrier bag
+   Each recording is a pixel flower in a basket of sand.
+   - Tap it: the recording plays and the flower grows, pixel by pixel.
+   - Leave it: after 3 days it starts to wither; petals fall into the sand.
+   - Most played = tallest.
+   - A basket you share only plays when two people are here, and a tap plays for both.
+   Storage: inside this artifact (db = baskets, assets = audio, room = who's here).
+   Opened as a plain file it keeps things in this browser only. */
+
+const DAY = 864e5, now = () => Date.now();
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const $ = s => document.querySelector(s);
+const uid = () => (crypto.randomUUID ? crypto.randomUUID().replace(/-/g, '').slice(0, 12) : Math.random().toString(36).slice(2, 14));
+function hash(s){ let h = 2166136261; for (const c of String(s)) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+function rng(seed){ let s = hash(seed) || 1; return () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; }; }
+
+/* =================== storage backends (same shape for both) =================== */
+const PIECE = 19 * 1024 * 1024, joined = new Map();
+function cloudBackend(db, assets, user, me){
+  let mine = {}, shared = {}, onChange = () => {};
+  const emit = () => onChange({ ...mine, ...shared });
+  const ref = b => b.shared ? db.doc('bags/' + b.id) : db.doc(`data/users/${me}/${b.id}`);
+  return {
+    kind: 'cloud', canAdd: !!assets,
+    start(cb){
+      onChange = cb;
+      let answered = 0; const done = () => { if (++answered === 2) clearTimeout(slow); };
+      const slow = setTimeout(() => say('can’t reach your garden yet…'), 10000);
+      db.collection('data/users/' + me).onSnapshot(s => { mine = {}; s.docs.forEach(d => mine[d.id] = { ...structuredClone(d.data()), id: d.id, shared: false }); if (!s.metadata.fromCache) done(); emit(); }, () => done());
+      db.collection('bags').onSnapshot(s => { shared = {}; s.docs.forEach(d => shared[d.id] = { ...structuredClone(d.data()), id: d.id, shared: true }); if (!s.metadata.fromCache) done(); emit(); }, () => done());
+    },
+    async createBag(name){ const b = { id: uid(), name, created: now(), owner: me, flowers: {} }; await ref({ ...b, shared: false }).set(b); return b.id; },
+    rename: (b, name) => ref(b).update({ name }),
+    async setShared(b, on){
+      const body = { name: b.name, created: b.created, owner: b.owner || me, flowers: b.flowers || {}, access: b.access || 'together' };
+      await ref({ ...b, shared: on }).set(body); await ref(b).delete();
+    },
+    async setAccess(b, access){   // 'private' | 'together' | 'listen' | 'tend'
+      if (access === 'private') { if (b.shared) await this.setShared(b, false); return; }
+      if (!b.shared) { b.access = access; await this.setShared(b, true); }
+      else await ref(b).update({ access });
+    },
+    async deleteBag(b){ if (assets) for (const f of Object.values(b.flowers || {})) for (const id of [f, ...(f.notes || [])].flatMap(o => [o.asset, ...(o.parts || [])]).filter(Boolean)) await assets.delete(id).catch(() => {}); await ref(b).delete(); },
+    addFlower: (b, f) => ref(b).update({ flowers: { [f.id]: f } }),
+    patchFlower: (b, fid, p) => ref(b).update({ flowers: { [fid]: p } }),
+    patchMany: (b, m) => ref(b).update({ flowers: m }),
+    async removeFlower(b, fid){
+      const f = b.flowers[fid], rest = { ...b.flowers }; delete rest[fid];
+      await ref(b).set({ name: b.name, created: b.created, owner: b.owner || me, flowers: rest });
+      if (assets && f) [f, ...(f.notes || [])].flatMap(o => [o.asset, ...(o.parts || [])]).filter(Boolean).forEach(id => assets.delete(id).catch(() => {}));
+    },
+    dropAudio(o){ if (assets && o) [o.asset, ...(o.parts || [])].filter(Boolean).forEach(id => assets.delete(id).catch(() => {})); },
+    /* storage takes one file up to 20 MB, so a longer recording goes up in pieces
+       (each piece starts with one marker byte) and is joined again when it plays */
+    async putAudio(file, fid, progress){
+      const ext = (file.name.split('.').pop() || '').toLowerCase();
+      const type = /^image\/(png|jpeg|gif|webp)$/.test(file.type) ? file.type : ['webm', 'ogg', 'opus', 'oga'].includes(ext) || /webm|ogg|opus/.test(file.type) ? 'video/webm' : 'video/mp4';
+      if (file.size <= PIECE) return { asset: (await assets.upload(file, { type })).id };
+      const parts = [], n = Math.ceil(file.size / PIECE);
+      try {
+        for (let i = 0; i < n; i++) {
+          progress?.(i + 1, n);
+          const piece = new Blob([new Uint8Array([0]), file.slice(i * PIECE, (i + 1) * PIECE)], { type: 'video/mp4' });
+          parts.push((await assets.upload(piece, { type: 'video/mp4' })).id);
+        }
+      } catch (e) { parts.forEach(id => assets.delete(id).catch(() => {})); throw e; }
+      return { parts, mime: file.type || 'audio/mp4' };
+    },
+    async audioSrc(f){
+      if (f.asset) return '/_blob/' + f.asset;
+      if (!f.parts?.length) return null;
+      if (joined.has(f.id)) return joined.get(f.id);
+      const bufs = await Promise.all(f.parts.map(id => fetch('/_blob/' + id).then(r => { if (!r.ok) throw 0; return r.arrayBuffer(); })));
+      const url = URL.createObjectURL(new Blob(bufs.map(b => b.slice(1)), { type: f.mime || 'audio/mp4' }));
+      joined.set(f.id, url); return url;
+    },
+  };
+}
+function localBackend(){
+  let dbp; const open = () => dbp ||= new Promise((res, rej) => { try { const r = indexedDB.open('carrier-bag-2', 1);
+    r.onupgradeneeded = () => { r.result.createObjectStore('kv'); r.result.createObjectStore('audio'); };
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); } catch (e) { rej(e); } });
+  const q = (st, m, fn) => open().then(db => new Promise((res, rej) => { const r = fn(db.transaction(st, m).objectStore(st)); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }));
+  const mem = new Map(); let bags = {}, cb = () => {};
+  const save = () => { q('kv', 'readwrite', o => o.put(bags, 'bags')).catch(() => {}); cb(JSON.parse(JSON.stringify(bags))); };
+  return {
+    kind: 'local', canAdd: true,
+    async start(c){ cb = c; bags = (await q('kv', 'readonly', o => o.get('bags')).catch(() => null)) || {}; cb(JSON.parse(JSON.stringify(bags))); },
+    async createBag(name){ const id = uid(); bags[id] = { id, name, created: now(), shared: false, flowers: {} }; save(); return id; },
+    rename(b, name){ bags[b.id].name = name; save(); },
+    setShared(){},
+    setAccess(){},
+    deleteBag(b){ delete bags[b.id]; save(); },
+    addFlower(b, f){ bags[b.id].flowers[f.id] = f; save(); },
+    patchFlower(b, fid, p){ Object.assign(bags[b.id].flowers[fid], p); save(); },
+    patchMany(b, m){ for (const k in m) Object.assign(bags[b.id].flowers[k], m[k]); save(); },
+    removeFlower(b, fid){ (bags[b.id].flowers[fid]?.notes || []).forEach(n => q('audio', 'readwrite', o => o.delete(n.id)).catch(() => {})); delete bags[b.id].flowers[fid]; q('audio', 'readwrite', o => o.delete(fid)).catch(() => {}); save(); },
+    dropAudio(n){ mem.delete(n.id); q('audio', 'readwrite', o => o.delete(n.id)).catch(() => {}); },
+    async putAudio(file, fid){ mem.set(fid, file); await q('audio', 'readwrite', o => o.put(file, fid)).catch(() => {}); return {}; },
+    async audioSrc(f){ const blob = mem.get(f.id) || await q('audio', 'readonly', o => o.get(f.id)).catch(() => null); return blob ? URL.createObjectURL(blob) : null; },
+  };
+}
+
+
+/* ---------- your own site: Supabase (used when config.js has your project's URL and key) ---------- */
+function supabaseBackend(sb, me){
+  let onChange = () => {}, timer = null;
+  const fromRow = r => ({ id: r.id, name: r.name, created: Number(r.created), shared: r.shared, access: r.access || 'together', owner: r.owner, flowers: r.flowers || {} });
+  const load = async () => {
+    const { data, error } = await sb.from('bags').select('*');
+    if (error) { say('can’t reach your garden · ' + error.message); return; }
+    onChange(Object.fromEntries(data.map(r => [r.id, fromRow(r)])));
+  };
+  const reload = () => { clearTimeout(timer); timer = setTimeout(load, 120); };
+  const must = async q => { const { error } = await q; if (error) throw error; };
+  const del = paths => paths.length && sb.storage.from('audio').remove(paths).catch(() => {});
+  const pathsOf = f => [f, ...(f.notes || [])].flatMap(o => [o.audio, ...(o.parts || [])]).filter(Boolean);
+  return {
+    kind: 'supabase', shares: true, canAdd: true,
+    async start(cb){
+      onChange = cb;
+      const want = (location.hash.match(/^#b-([A-Za-z0-9]+)/) || [])[1];
+      if (want) await sb.rpc('join_bag', { bag_id: want });        // opening a friend's link adds you to that basket
+      await load();
+      sb.channel('bags-changes').on('postgres_changes', { event: '*', schema: 'public', table: 'bags' }, reload).subscribe();
+    },
+    async createBag(name){ const id = uid(); await must(sb.from('bags').insert({ id, name, created: now(), owner: me })); await load(); return id; },
+    rename: (b, name) => must(sb.from('bags').update({ name }).eq('id', b.id)),
+    setShared: async (b, on) => { await must(sb.from('bags').update({ shared: on }).eq('id', b.id)); await load(); },
+    async setAccess(b, access){
+      const { error } = await sb.from('bags').update(access === 'private' ? { shared: false } : { shared: true, access }).eq('id', b.id);
+      if (error) throw new Error(/access/.test(error.message) ? 'run the newest supabase/setup.sql once, then try again' : error.message);
+      await load();
+    },
+    async deleteBag(b){ del(flowersOf(b).flatMap(pathsOf)); await must(sb.from('bags').delete().eq('id', b.id)); await load(); },
+    addFlower: (b, f) => must(sb.rpc('add_flower', { bag_id: b.id, flower: f })),
+    patchFlower: (b, fid, p) => must(sb.rpc('patch_flower', { bag_id: b.id, fid, patch: p })),
+    countPlay: (b, fid) => must(sb.rpc('play_flower', { bag_id: b.id, fid })),
+    async patchMany(b, m){ for (const k in m) await must(sb.rpc('patch_flower', { bag_id: b.id, fid: k, patch: m[k] })); },
+    async removeFlower(b, fid){ const f = b.flowers[fid]; await must(sb.rpc('remove_flower', { bag_id: b.id, fid })); if (f) del(pathsOf(f)); },
+    dropAudio(n){ del([n.audio, ...(n.parts || [])].filter(Boolean)); },
+    /* the free plan takes files up to 50 MB; longer recordings go up in pieces and are joined again to play */
+    async putAudio(file, fid, progress){
+      const put = async (path, blob) => must(sb.storage.from('audio').upload(path, blob, { contentType: blob.type || 'application/octet-stream', upsert: false }));
+      const SIZE = 45 * 1024 * 1024, base = `${me}/${fid}`;
+      if (file.size <= SIZE) { await put(base, file); return { audio: base, mime: file.type || '' }; }
+      const parts = [], n = Math.ceil(file.size / SIZE);
+      try { for (let i = 0; i < n; i++) { progress?.(i + 1, n); const pth = `${base}.${i}`; await put(pth, file.slice(i * SIZE, (i + 1) * SIZE)); parts.push(pth); } }
+      catch (e) { del(parts); throw e; }
+      return { parts, mime: file.type || '' };
+    },
+    async audioSrc(f){
+      if (joined.has(f.id)) return joined.get(f.id);
+      if (f.audio) { const { data } = await sb.storage.from('audio').createSignedUrl(f.audio, 6 * 3600); return data?.signedUrl || null; }
+      if (!f.parts?.length) return null;
+      const blobs = await Promise.all(f.parts.map(pth => sb.storage.from('audio').download(pth).then(r => { if (r.error) throw r.error; return r.data; })));
+      const url = URL.createObjectURL(new Blob(blobs, { type: f.mime || 'audio/mp4' })); joined.set(f.id, url); return url;
+    },
+  };
+}
+/* who's here + play/stop for a shared basket, over Supabase Realtime, shaped like the artifact's room */
+function supabaseRoom(sb, me, myName){
+  const tab = uid();
+  return { async join(name){
+    const ch = sb.channel(name, { config: { presence: { key: tab }, broadcast: { self: true } } });
+    const peerFns = [], topics = {};
+    let list = [];
+    ch.on('presence', { event: 'sync' }, () => {
+      list = Object.entries(ch.presenceState()).map(([k, arr]) => ({ kind: 'viewer', peer: k, by: arr[0]?.user || null, name: arr[0]?.name || '', isMe: arr[0]?.user === me, sameTab: k === tab }));
+      peerFns.forEach(fn => fn({ peers: list }));
+    });
+    ch.on('broadcast', { event: '*' }, m => (topics[m.event] || []).forEach(fn => fn({ topic: m.event, data: m.payload })));
+    await new Promise((res, rej) => ch.subscribe(st => { if (st === 'SUBSCRIBED') { ch.track({ user: me, name: myName }); res(); } else if (st === 'CHANNEL_ERROR' || st === 'TIMED_OUT') rej(st); }));
+    return {
+      peers: () => list,
+      onPeers: fn => { peerFns.push(fn); return () => {}; },
+      on: (t, fn) => { (topics[t] ||= []).push(fn); return () => {}; },
+      emit: (t, data) => ch.send({ type: 'broadcast', event: t, payload: data }),
+      leave: () => sb.removeChannel(ch),
+    };
+  } };
+}
+function loadScript(src){ return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s); }); }
+
+/* =================== state =================== */
+const T = { days: 0, tabs: false, fake: false };   // test panel, never saved
+const seen = () => now() + T.days * DAY;
+let canUpload = true;
+const ownsBag = b => !!b && (store?.kind === 'local' || !b.owner || b.owner === me);
+let store, bags = {}, curId = null, me = null, canEdit = true, room = null, live = null, userNS = null, startedEmpty = false;
+const cur = () => bags[curId];
+const flowersOf = b => Object.values(b?.flowers || {}).filter(f => f && !String(f.id).startsWith('__'));
+const edgeOf = b => b?.flowers?.__edge?.pts?.length > 5 ? b.flowers.__edge.pts : null;   // the patch's hand-drawn edge, as [x, y] from 0 to 1
+
+/* =================== the pixel world =================== */
+const cv = $('#cv'), cx = cv.getContext('2d');
+let S = 5, LW = 0, LH = 0, ground = [], GW = 0;   // S = screen pixels per world pixel; GW = how wide the garden is (can be wider than the screen)
+const MAXH = 150;                                   // longest stem we ever draw, in world pixels
+const SAND = ['#d4a96a', '#c99c5c', '#dcb57a'], WEAVE = ['#b0814e', '#94683a'], RIM = '#741b47';
+const STEM = '#3f6b4a', LEAF = '#4f8a5a', DEAD = '#8d8565', DEADBLOOM = '#9b7f6a';
+// nine colors, built around plum #741b47 and yellow #f1c232; a drawing stores each pixel as one of these digits
+const PALETTE = ['#741b47', '#f1c232', '#c27ba0', '#e69138', '#8e7cc3', '#e06666', '#6fa8dc', '#fff2cc', '#4c1130'];
+const PAIRS = [[0, 2, 1], [1, 3, 0], [4, 6, 1], [5, 0, 7], [6, 4, 7], [3, 1, 8], [2, 0, 1], [8, 4, 1]];   // petal, second petal, center: every flower gets its own
+const HEADS = [ // little dithered blossoms, like sandspiel / the reference: X petal, x second petal color, o center
+  ['.X.X.', 'XxXxX', '.XoX.', 'XxXxX', '.X.X.'],
+  ['.XX.', 'XxxX', 'XxxX', '.XX.'],
+  ['X.X', '.o.', 'X.X'],
+  ['X...X', 'XX.XX', '.XxX.', '..X..'],
+  ['.x.', 'xXx', '.x.'],
+];
+
+function makeGround(w){
+  if (w <= ground.length && GW) { GW = w; return; }
+  const r = rng('ground'), base = LH - 13; ground = [];
+  let h = 0; for (let x = 0; x < w + LW; x++) { if (r() < .25) h = clamp(h + (r() < .5 ? -1 : 1), -2, 2); ground.push(base + h); }
+  GW = w;
+}
+const gAt = x => ground[clamp(Math.round(x), 0, ground.length - 1)];
+/* every flower keeps a little room of its own; if they don't all fit, the bed grows longer than the screen and you scroll it */
+const SPACE = 11, pos = new Map();
+const pan = { x: 0, drag: null, to: null };
+function layout(fs){
+  const n = fs.length, w = Math.max(LW, n * SPACE + 16);
+  if (w !== GW) makeGround(w);
+  const order = fs.slice().sort((a, c) => a.x - c.x || (a.id < c.id ? -1 : 1)), xs = order.map(f => 8 + f.x * (w - 16));
+  for (let i = 0; i < n; i++) xs[i] = Math.max(xs[i], i ? xs[i - 1] + SPACE : 8);
+  for (let i = n - 1; i >= 0; i--) xs[i] = Math.min(xs[i], i < n - 1 ? xs[i + 1] - SPACE : w - 8);
+  for (let i = 0; i < n; i++) xs[i] = Math.max(xs[i], i ? xs[i - 1] + SPACE : 8);
+  pos.clear(); order.forEach((f, i) => pos.set(f.id, Math.round(xs[i])));
+  if (pan.to && pos.has(pan.to)) { pan.x = pos.get(pan.to) - LW / 2; pan.to = null; }
+  pan.x = clamp(pan.x, 0, Math.max(0, GW - LW));
+}
+function panMove(e){ pan.x = clamp(pan.drag.px - (e.clientX - pan.drag.x) / S, 0, Math.max(0, GW - LW)); if (Math.abs(e.clientX - pan.drag.x) > 4) pan.drag.moved = true; }
+function resize(){
+  S = innerWidth < 600 ? 4 : 5;
+  LW = Math.ceil(innerWidth / S); LH = Math.ceil(innerHeight / S);
+  cv.width = LW; cv.height = LH; cv.style.width = LW * S + 'px'; cv.style.height = LH * S + 'px';
+  GW = 0; makeGround(LW);
+  pile.clear(); flakes.length = 0;
+  layoutHint();
+}
+
+/* each flower's shape is fixed by its id; its height comes from plays; withering bends and fades it */
+const shapes = new Map();
+function shape(f){
+  if (shapes.has(f.id)) return shapes.get(f.id);
+  const r = rng(f.id), n = 1, stems = [];   // one recording = one stem, one blossom
+  for (let i = 0; i < n; i++) {
+    const lean = r() < .5 ? -1 : 1, path = [0]; let x = Math.round((i - (n - 1) / 2) * 3 + (r() - .5) * 2);
+    path[0] = x;
+    for (let y = 1; y < MAXH; y++) { if (r() < .28) x += (r() < .7 ? lean : -lean); path.push(x); }
+    const leaves = []; for (let at = 3 + Math.floor(r() * 5); at < MAXH; at += 7 + Math.floor(r() * 8)) leaves.push({ at, side: r() < .5 ? -1 : 1 });
+    stems.push({ path, leaves, len: .65 + r() * .35 });
+  }
+  const s = { stems, side: r() < .5 ? -1 : 1 };
+  shapes.set(f.id, s); return s;
+}
+const witherOf = f => clamp(((seen() - (f.lastPlayed || f.added)) / DAY - 3) / 11, 0, 1);   // 3 days fine … 14 days gone
+const tallest = () => Math.min(MAXH, LH - 40);
+const targetH = f => Math.round(clamp(7 + 9 * Math.sqrt(f.plays || 0), 7, tallest()) * (1 - .3 * witherOf(f)));   // 1 play 16px, 4 → 25, 20 → 47, 100 → 97
+const shown = new Map();                            // animated height, grows 1 pixel at a time
+const baseX = f => pos.get(f.id) ?? Math.round(8 + f.x * (Math.max(GW, LW) - 16));
+function mix(a, b, t){ const p = s => [1, 3, 5].map(i => parseInt(s.slice(i, i + 2), 16)); const A = p(a), B = p(b);
+  return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * t).toString(16).padStart(2, '0')).join(''); }
+
+/* falling things: withered petals drop into the sand (and stay), playing flowers give off little sparks */
+const pile = new Map(), flakes = [];
+const px = (x, y, c) => { cx.fillStyle = c; cx.fillRect(Math.round(x), Math.round(y), 1, 1); };
+
+/* blossoms: a grid of palette digits ('.' = empty). Drawn by you (f.draw), or made from a pattern. */
+function colorsOf(f){
+  if (Array.isArray(f.color)) return f.color;
+  const fs = flowersOf(cur()).sort((a, b) => (a.added || 0) - (b.added || 0) || (a.id < b.id ? -1 : 1));
+  return PAIRS[Math.max(0, fs.findIndex(x => x.id === f.id)) % PAIRS.length];   // older flowers: spread across the colors in order
+}
+function patternGrid(pat, [p, q, c]){ return pat.map(row => [...row].map(ch => ch === 'X' ? p : ch === 'x' ? q : ch === 'o' ? c : '.').join('')); }
+function generatedGrid(f, small){
+  const n = hash(f.id), pat = small ? [HEADS[2], HEADS[4]][n % 2] : [HEADS[0], HEADS[1], HEADS[3]][n % 3];
+  return patternGrid(pat, colorsOf(f));
+}
+const blossoms = new Map();
+function blossomOf(f){
+  const small = !f.draw && (f.plays || 0) < 3, key = f.id + (f.draw ? f.draw.join('') : small ? 's' : 'b') + (f.color || '');
+  if (blossoms.get(f.id)?.key === key) return blossoms.get(f.id);
+  let rows = f.draw && f.draw.some(r => /[0-9]/.test(r)) ? f.draw : generatedGrid(f, small);
+  // trim empty edges so the drawing sits right on its stem
+  let t = 0, b = rows.length - 1; while (t < b && !/[0-9]/.test(rows[t])) t++; while (b > t && !/[0-9]/.test(rows[b])) b--;
+  rows = rows.slice(t, b + 1);
+  let l = 99, r = -1; rows.forEach(row => [...row].forEach((ch, i) => { if (ch !== '.') { l = Math.min(l, i); r = Math.max(r, i); } }));
+  rows = rows.map(row => row.slice(l, r + 1));
+  const g = { key, rows, cx: (r - l) / 2 };
+  blossoms.set(f.id, g); return g;
+}
+
+function drawFlower(f, t, alpha){
+  const s = shape(f), w = witherOf(f), bx = baseX(f), gy = gAt(bx);
+  let h = shown.get(f.id) ?? 0; const target = targetH(f), isPlay = voices.has(f.id);
+  if (h !== target && (t % (isPlay ? 6 : 2) === 0)) { h += Math.sign(target - h); shown.set(f.id, h); }   // grow (or shrink) one pixel
+  cx.globalAlpha = alpha;
+  const stemC = mix(STEM, DEAD, w), leafC = mix(LEAF, DEAD, w);
+  let top = gy; const stemPts = [];
+  for (const st of s.stems) {
+    const L = Math.max(1, Math.round(h * st.len));
+    let hx = 0, hy = 0;
+    for (let i = 0; i < L; i++) {
+      const bend = Math.round(w * 7 * (i / L) ** 2) * s.side;          // withering bends the top over
+      const x = bx + st.path[i] + bend, y = gy - 1 - i + Math.round(w * 3 * (i / L) ** 3);
+      px(x, y, stemC); hx = x; hy = y;
+      for (const lf of st.leaves) if (lf.at === i && i < L - 3) { px(x + lf.side, y, leafC); px(x + 2 * lf.side, y - 1, leafC); }
+      stemPts[i] = [x, y];
+    }
+    // pollen: small flowers on twigs along the stem, each holding a sound, words, a photo or a video
+    const ns = notesOf(f);
+    if (ns.length && L >= 6) ns.forEach((n, i) => {
+      const at = clamp(Math.round(L * (.22 + .58 * (i + .5) / ns.length)), 2, L - 4), [sx, sy] = stemPts[at];
+      const side = (i % 2 ? 1 : -1) * s.side, tx = sx + side * 3, ty = sy - 2, key = f.id + '~' + n.id, on = voices.has(key);
+      px(sx + side, sy - 1, stemC); px(sx + side * 2, sy - 2, stemC);
+      // a small flower: its shape says what it holds (sound, words, photo, video); its color is its own
+      const kind = n.kind || 'sound', tw = c => on && Math.random() < .25 ? '#ffffff' : mix(c, DEADBLOOM, w);
+      const petal = PALETTE[n.color ?? 2] || PALETTE[2], centre = petal === '#fff2cc' || petal === '#f1c232' ? '#741b47' : '#fff2cc';
+      const SHAPES = OS_SHAPES;
+      (SHAPES[kind] || SHAPES.sound).forEach((row, j) => [...row].forEach((ch, i) => { if (ch !== '.') px(tx - 1 + i, ty - 1 + j, tw(ch === 'o' ? centre : petal)); }));
+      noteBoxes.push({ f, n, key, x: tx, y: ty });
+      if (on && Math.random() < .12) flakes.push({ x: tx, y: ty - 2, c: Math.random() < .5 ? '#f1c232' : '#741b47', life: 14 + Math.random() * 10 });
+    });
+    if (h >= 5) { // the blossom: your drawing, or a generated one in this flower's own colors
+      const g = blossomOf(f), k = (f.plays || 0) >= 15 ? 2 : 1, r = rng(f.id + 'petals');
+      const ox = hx - Math.round(g.cx * k), oy = hy - (g.rows.length - 1) * k;
+      let firstC = null;
+      g.rows.forEach((row, j) => [...row].forEach((ch, i) => {
+        if (ch === '.') return;
+        if (w > .55 && r() < (w - .45)) return;                            // petals gone
+        let c = mix(PALETTE[+ch] || PALETTE[0], DEADBLOOM, w); firstC ||= c;
+        if (isPlay && Math.random() < .12) c = '#ffffff';                  // twinkle while it sounds
+        for (let a = 0; a < k; a++) for (let d = 0; d < k; d++) px(ox + i * k + a, oy + j * k + d, c);
+      }));
+      top = Math.min(top, oy);
+      if (w > .4 && Math.random() < .004 * w) flakes.push({ x: hx, y: hy, c: firstC || DEADBLOOM, fall: true });
+      if (isPlay && Math.random() < .18) flakes.push({ x: hx + Math.round((Math.random() - .5) * 6), y: oy - 1, c: Math.random() < .5 ? '#f1c232' : '#741b47', life: 18 + Math.random() * 14 });
+    }
+    top = Math.min(top, hy);
+  }
+  cx.globalAlpha = 1;
+  return { bx, top, gy };
+}
+
+let tick = 0, boxes = [], noteBoxes = [];
+const dayOf = t => { const d = new Date(t || 0); return `${d.getDate()} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]}`; };
+const noteLabel = n => (n.kind === 'words' ? '“' + short((n.text || '').split('\n')[0], 26) + '”' : (n.kind || 'sound') + ' pollen') + ' · ' + dayOf(n.added);
+// annotations; an old-style marker note shows up as words
+const notesOf = f => { const ns = (Array.isArray(f.notes) ? f.notes : []).slice();
+  if (f.marker?.text && !ns.some(n => n.id === 'marker')) ns.push({ id: 'marker', kind: 'words', text: f.marker.text, added: f.marker.at || f.added, by: f.marker.by });
+  return ns.sort((a, b) => (a.added || 0) - (b.added || 0)); };
+const realNotes = f => notesOf(f).filter(n => n.id !== 'marker');
+function frame(){
+  if (view === 'garden' || !cur()) { requestAnimationFrame(frame); return; }
+  tick++;
+  cx.setTransform(1, 0, 0, 1, 0, 0); cx.fillStyle = '#f2e6e6'; cx.fillRect(0, 0, LW, LH);
+  const b = cur(), closed = !!b?.shared && !together(), fs = flowersOf(b);
+  layout(fs);
+  const X0 = Math.floor(pan.x); cx.setTransform(1, 0, 0, 1, -X0, 0);       // the garden scrolls; everything below is in garden pixels
+  noteBoxes = [];
+  boxes = fs.sort((a, c) => baseX(a) - baseX(c)).map(f => ({ f, ...drawFlower(f, tick, closed ? .45 : 1) }));
+  // sand, then the basket band under it (each grain fixed to its spot, so it doesn't shimmer as you scroll)
+  for (let x = X0; x < X0 + LW + 1; x++) for (let y = gAt(x); y < LH; y++) {
+    const fromBottom = LH - y;
+    if (fromBottom <= 7) { const row = Math.floor((LH - y - 1) / 2), c = Math.floor((x + row * 2) / 4) % 2; px(x, y, fromBottom === 7 ? RIM : WEAVE[c]); }
+    else px(x, y, SAND[((Math.imul(x, 73856093) ^ Math.imul(y, 19349663)) >>> 0) % 3]);
+  }
+  for (const [k, c] of pile) { const [x, y] = k.split(',').map(Number); px(x, y, c); }
+  // flakes
+  for (let i = flakes.length - 1; i >= 0; i--) {
+    const p = flakes[i];
+    if (p.fall) {
+      if (tick % 2) { const nx = p.x + (Math.random() < .3 ? (Math.random() < .5 ? -1 : 1) : 0), ny = p.y + 1;
+        const floor = gAt(nx);
+        if (ny >= floor || pile.has(nx + ',' + ny)) { // land, sand-style: slide off a peak
+          let lx = p.x, ly = p.y; for (const d of [0, -1, 1]) { const k = (p.x + d) + ',' + (p.y + 1); if (!pile.has(k) && p.y + 1 < gAt(p.x + d)) { lx = p.x + d; ly = p.y + 1; break; } }
+          if (ly === p.y || ly + 1 >= gAt(lx) || pile.has(lx + ',' + (ly + 1))) { if (pile.size < 900) pile.set(lx + ',' + ly, p.c); flakes.splice(i, 1); continue; }
+          p.x = lx; p.y = ly;
+        } else { p.x = nx; p.y = ny; }
+      }
+      px(p.x, p.y, p.c);
+    } else {
+      if (tick % 3 === 0) { p.y -= 1; if (Math.random() < .3) p.x += Math.random() < .5 ? -1 : 1; }
+      if (--p.life <= 0) { flakes.splice(i, 1); continue; }
+      cx.globalAlpha = clamp(p.life / 12, 0, 1); px(p.x, p.y, p.c); cx.globalAlpha = 1;
+    }
+  }
+  if (flakes.length > 300) flakes.splice(0, flakes.length - 300);
+  cx.setTransform(1, 0, 0, 1, 0, 0);
+  if (replant?.cx != null && GW > LW) { if (replant.cx < 50) pan.x = Math.max(0, pan.x - 1.5); if (replant.cx > innerWidth - 50) pan.x = Math.min(GW - LW, pan.x + 1.5); }
+  $('#edgeL').hidden = pan.x <= 0.5; $('#edgeR').hidden = pan.x >= GW - LW - 0.5;
+  placeLabel();
+  requestAnimationFrame(frame);
+}
+
+/* picking: the nearest flower whose column you tapped */
+function pick(clientX, clientY){
+  const x = clientX / S + Math.floor(pan.x), y = clientY / S; let best = null, d = 1e9;
+  for (const bx of boxes) { const dx = Math.abs(x - bx.bx); if (dx <= 7 && y >= bx.top - 5 && y <= bx.gy + 1 && dx < d) { d = dx; best = bx.f; } }
+  return best;
+}
+function pickNote(clientX, clientY){
+  const x = clientX / S + Math.floor(pan.x), y = clientY / S; let best = null, d = 3.2;
+  for (const nb of noteBoxes) { const dd = Math.hypot(x - nb.x, y - nb.y); if (dd < d) { d = dd; best = nb; } }
+  return best;
+}
+let hover = null, hoverNote = null;
+function placeLabel(){
+  const l = $('#label');
+  if (hoverNote) { const nb = noteBoxes.find(x => x.key === hoverNote.key);
+    if (nb) { l.textContent = noteLabel(nb.n); l.hidden = false; const half = Math.min(l.offsetWidth, innerWidth - 24) / 2;
+      l.style.left = clamp((nb.x - Math.floor(pan.x)) * S, 12 + half, innerWidth - 12 - half) + 'px'; l.style.top = (nb.y - 2) * S + 'px'; return; } }
+  const lk = lastStarted && lastStarted.split('~')[0];
+  const f = hover || (lk && cur()?.flowers?.[lk]);
+  const bx = f && boxes.find(b => b.f.id === f.id);
+  if (!bx || !(f.name || '').trim()) { l.hidden = true; return; }
+  l.textContent = f.name; l.hidden = false;
+  const half = Math.min(l.offsetWidth, innerWidth - 24) / 2;
+  l.style.left = clamp((bx.bx - Math.floor(pan.x)) * S, 12 + half, innerWidth - 12 - half) + 'px'; l.style.top = (bx.top - 3) * S + 'px';
+}
+function layoutHint(){ $('#hint').style.top = (LH - 26) * S + 'px'; }
+
+/* =================== the garden: a seed tray for every patch =================== */
+let view = 'garden';
+/* a patch of soil with an irregular, hand-drawn edge; each patch gets its own shape */
+function inPoly(x, y, pts){ let c = false; for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) { const [xi, yi] = pts[i], [xj, yj] = pts[j]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c; } return c; }
+function drawnShape(id, norm){
+  const pts = norm.map(([x, y]) => [x * 100, y * 64]), xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  return { inside: (x, y) => inPoly(x + .5, y + .5, pts), cx: (x0 + x1) / 2, cy: (y0 + y1) / 2 + (y1 - y0) * .12, rx: (x1 - x0) / 2, ry: Math.max(3, (y1 - y0) / 2), r: rng('patch' + id) };
+}
+function patchShape(id){
+  const r = rng('patch' + id), a = [r() * 6.3, r() * 6.3, r() * 6.3, r() * 6.3];
+  const k = [.07 + r() * .06, .05 + r() * .04, .03 + r() * .03, .015];
+  const rx = 40 + r() * 6, ry = 13 + r() * 4, cx = 50 + (r() - .5) * 4, cy = 46;
+  const rad = t => 1 + k[0] * Math.sin(2 * t + a[0]) + k[1] * Math.sin(3 * t + a[1]) + k[2] * Math.sin(5 * t + a[2]) + k[3] * Math.sin(11 * t + a[3]);
+  const inside = (x, y) => { const dx = (x - cx) / rx, dy = (y - cy) / ry, t = Math.atan2(dy, dx); return Math.hypot(dx, dy) <= rad(t); };
+  return { inside, cx, cy, rx, ry, r };
+}
+function drawTray(canvas, b, empty){
+  const W = 100, Hh = 64, c = canvas.getContext('2d'); canvas.width = W; canvas.height = Hh;
+  c.clearRect(0, 0, W, Hh);
+  const P = (x, y, col) => { c.fillStyle = col; c.fillRect(Math.round(x), Math.round(y), 1, 1); };
+  const sh = !empty && edgeOf(b) ? drawnShape(b.id, edgeOf(b)) : patchShape(empty ? 'new' : b.id), SOIL = ['#9b6b43', '#8a5d39', '#a8774c'], EDGE = '#5a3a1a';
+  const isIn = (x, y) => x >= 0 && y >= 0 && x < W && y < Hh && sh.inside(x, y);
+  const edge = (x, y) => isIn(x, y) && (!isIn(x - 1, y) || !isIn(x + 1, y) || !isIn(x, y - 1) || !isIn(x, y + 1));
+  if (empty) { for (let y = 0; y < Hh; y++) for (let x = 0; x < W; x++) if (edge(x, y) && (x + y) % 3 !== 0) P(x, y, '#a58c90'); return; }
+  // every patch: pale sandy soil and a soft dotted edge
+  c.globalAlpha = .3;
+  for (let y = 0; y < Hh; y++) for (let x = 0; x < W; x++) if (isIn(x, y) && !edge(x, y)) P(x, y, SOIL[((Math.imul(x, 73856093) ^ Math.imul(y, 19349663)) >>> 0) % 3]);
+  c.globalAlpha = 1;
+  for (let y = 0; y < Hh; y++) for (let x = 0; x < W; x++) if (edge(x, y)) P(x, y, '#a58c90');
+  for (let i = 0; i < 6; i++) { const x = Math.round(sh.cx + (sh.r() - .5) * sh.rx * 1.6), y = Math.round(sh.cy + (sh.r() - .5) * sh.ry * 1.2); if (isIn(x, y) && !edge(x, y)) P(x, y, '#c9a26c'); }   // a few pebbles
+  // flowers, planted across the bed (back ones first)
+  const fs = flowersOf(b).slice().sort((a2, c2) => a2.x - c2.x), n = fs.length;
+  const plots = fs.map((f, i) => { const rr = rng('spot' + f.id); const u = n > 1 ? .12 + .76 * (i / (n - 1)) * .8 + .76 * .2 * f.x : .5;
+    let x = Math.round(sh.cx - sh.rx * .85 + u * sh.rx * 1.7), y = Math.round(sh.cy + (rr() - .55) * sh.ry * 1.1);
+    for (let tries = 0; tries < 40 && !isIn(x, y); tries++) { x = Math.round(sh.cx + (rr() - .5) * sh.rx * 1.6); y = Math.round(sh.cy + (rr() - .5) * sh.ry * 1.4); }   // keep every flower inside your edge
+    return { f, x, y }; }).sort((a2, c2) => a2.y - c2.y);
+  plots.forEach(({ f, x: bx, y: g }) => {
+    const s = shape(f), st = s.stems[0], w = witherOf(f);
+    const L = Math.max(3, Math.round(clamp(targetH(f) * .5, 3, g - 4)));
+    const stemC = mix(STEM, DEAD, w); let hx = bx, hy = g;
+    for (let k = 0; k < L; k++) { const bend = Math.round(w * 4 * (k / L) ** 2) * s.side; hx = bx + Math.round(st.path[k] * .6) + bend; hy = g - 1 - k; P(hx, hy, stemC); }
+    const rows = blossomOf(f).rows, ox = hx - Math.floor((rows[0]?.length || 1) / 2), oy = hy - rows.length + 1;
+    if (L >= 4) rows.forEach((row, j) => [...row].forEach((ch, k2) => { if (ch !== '.') P(ox + k2, oy + j, mix(PALETTE[+ch] || PALETTE[0], DEADBLOOM, w)); }));
+    if (notesOf(f).length && L >= 8) { const ny = g - Math.round(L * .5), nx = bx + 2 * s.side; P(nx, ny, PALETTE[2]); P(nx + s.side, ny, '#fff2cc'); }
+  });
+}
+let openTabs = []; try { openTabs = JSON.parse(localStorage.getItem('carrier-tabs') || '[]'); } catch {}
+const saveTabs = () => { try { localStorage.setItem('carrier-tabs', JSON.stringify(openTabs)); } catch {} };
+function closeTab(id){
+  openTabs = openTabs.filter(x => x !== id); saveTabs();
+  if (id !== curId) return render();
+  const next = openTabs.filter(x => bags[x]).pop();
+  next ? go(next) : goGarden();
+}
+/* the patch's name tab: the name on a little soil stepping-stone */
+function paintTab(canvas, b, btn){
+  const K = 3, w = Math.ceil(btn.querySelector('.pin').offsetWidth / K) + 2, h = 12;
+  canvas.width = w; canvas.height = h; canvas.style.width = w * K + 'px'; canvas.style.height = h * K + 'px';
+  const c = canvas.getContext('2d'), P = (x, y, col) => { c.fillStyle = col; c.fillRect(x, y, 1, 1); };
+  const inside = (x, y) => { const dx = (x + .5 - w / 2) / (w / 2 - .8), dy = (y + .5 - h / 2) / (h / 2 - .8), t = Math.atan2(dy, dx);
+    return (Math.abs(dx) ** 4 + Math.abs(dy) ** 4) ** .25 <= 1 + .05 * Math.sin(3 * t + 1) + .035 * Math.sin(5 * t + 2); };
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (inside(x, y)) {
+    const e = !inside(x - 1, y) || !inside(x + 1, y) || !inside(x, y - 1) || !inside(x, y + 1);
+    if (e) { P(x, y, '#a58c90'); continue; }                                                // soft edge
+    c.globalAlpha = .3; P(x, y, ['#9b6b43', '#8a5d39', '#a8774c'][((Math.imul(x, 73856093) ^ Math.imul(y, 19349663)) >>> 0) % 3]); c.globalAlpha = 1;   // pale sand
+  }
+}
+/* dig a patch: drag around to draw its edge; it closes when you let go */
+function digPad({ name, pts: start, isNew }){
+  return new Promise(resolve => {
+    closeCard();
+    const c = document.createElement('div'); c.className = 'card pad dig'; c.id = 'card'; c.setAttribute('role', 'dialog'); c.setAttribute('aria-label', 'Draw the edge of the patch');
+    c.innerHTML = `<button class="xbtn" data-a="x" aria-label="Close">×</button>
+      <input type="text" id="digName" aria-label="Patch name" placeholder="name the patch">
+      <canvas id="digCv" width="100" height="64" aria-label="Draw the edge of your patch"></canvas>
+      <div class="soft" id="digNote">draw the edge of your patch</div>
+      <div class="row"><button class="go" data-a="dig" disabled>dig</button><button data-a="again">again</button>${isNew ? '<button data-a="skip">skip</button>' : ''}</div>`;
+    document.body.appendChild(c);
+    $('#digName').value = name || '';
+    const cvs = $('#digCv'), x = cvs.getContext('2d');
+    let pts = start ? start.map(([a, b]) => [a * 100, b * 64]) : [], drawing = false, closed = !!start;
+    const P = (px2, py, col) => { x.fillStyle = col; x.fillRect(px2, py, 1, 1); };
+    const paint = () => {
+      x.clearRect(0, 0, 100, 64);
+      if (closed && pts.length > 5) {
+        const inn = (a, b) => a >= 0 && b >= 0 && a < 100 && b < 64 && inPoly(a + .5, b + .5, pts);
+        for (let b = 0; b < 64; b++) for (let a = 0; a < 100; a++) if (inn(a, b)) {
+          const e = !inn(a - 1, b) || !inn(a + 1, b) || !inn(a, b - 1) || !inn(a, b + 1);
+          if (e) P(a, b, '#a58c90');
+          else { x.globalAlpha = .3; P(a, b, ['#9b6b43', '#8a5d39', '#a8774c'][((Math.imul(a, 73856093) ^ Math.imul(b, 19349663)) >>> 0) % 3]); x.globalAlpha = 1; }
+        }
+      } else pts.forEach(([a, b], i) => { if (i % 2 === 0) P(Math.round(a), Math.round(b), '#5a3a1a'); });
+      c.querySelector('[data-a=dig]').disabled = !(closed && pts.length > 5);
+    };
+    paint();
+    const at = e => { const r = cvs.getBoundingClientRect(); return [clamp((e.clientX - r.left) / r.width * 100, 0, 99), clamp((e.clientY - r.top) / r.height * 64, 0, 63)]; };
+    cvs.addEventListener('pointerdown', e => { cvs.setPointerCapture(e.pointerId); drawing = true; closed = false; pts = [at(e)]; $('#digNote').textContent = 'keep going, all the way round'; paint(); });
+    cvs.addEventListener('pointermove', e => { if (!drawing) return; const p2 = at(e), l = pts[pts.length - 1]; if (Math.hypot(p2[0] - l[0], p2[1] - l[1]) >= 1.2) { pts.push(p2); paint(); } });
+    cvs.addEventListener('pointerup', () => {
+      if (!drawing) return; drawing = false;
+      const xs = pts.map(p2 => p2[0]), ys = pts.map(p2 => p2[1]);
+      if (pts.length < 8 || Math.max(...xs) - Math.min(...xs) < 14 || Math.max(...ys) - Math.min(...ys) < 6) { pts = []; closed = false; $('#digNote').textContent = 'a bit bigger · draw the edge of your patch'; paint(); return; }
+      closed = true; $('#digNote').textContent = 'that’s your patch · dig it, or draw again'; paint();
+    });
+    const finish = v => { c.remove(); resolve(v); };
+    c.addEventListener('click', e => {
+      const a = e.target.closest('[data-a]')?.dataset.a;
+      if (a === 'again') { pts = []; closed = false; $('#digNote').textContent = 'draw the edge of your patch'; paint(); }
+      if (a === 'dig' && closed) {
+        const step = Math.max(1, Math.floor(pts.length / 90));   // keep it light: about 90 points is plenty at this size
+        finish({ name: $('#digName').value.trim(), pts: pts.filter((_, i) => i % step === 0).map(([a2, b2]) => [+(a2 / 100).toFixed(3), +(b2 / 64).toFixed(3)]) });
+      }
+      if (a === 'skip') finish({ name: $('#digName').value.trim(), pts: null });
+      if (a === 'x') finish(null);
+    });
+    c.addEventListener('keydown', e => { if (e.key === 'Escape') finish(null); });
+  });
+}
+async function newPatch(){
+  const res = await digPad({ isNew: true }); if (!res) return;
+  const id = await store.createBag(res.name || 'patch ' + (Object.keys(bags).length + 1));
+  if (res.pts) await store.addFlower(bags[id] || { id, flowers: {} }, { id: '__edge', pts: res.pts });
+  render();
+}
+async function redrawEdge(b){
+  if (!b || edgeOf(b)) return;   // an edge is dug once and stays
+  const res = await digPad({ name: b.name }); if (!res) return;
+  if (res.name && res.name !== b.name) { b.name = res.name; await store.rename(b, res.name); }
+  if (res.pts) { b.flowers = { ...(b.flowers || {}), __edge: { id: '__edge', pts: res.pts } }; await store.addFlower(b, { id: '__edge', pts: res.pts }); }
+  render();
+}
+function renderGarden(){
+  const gEl = $('#garden'), list = Object.values(bags).sort((a, b2) => (b2.created || 0) - (a.created || 0));
+  gEl.innerHTML = `<div class="trays">${list.map(b => `<div class="tray" data-open="${b.id}" role="button" tabindex="0"><canvas aria-hidden="true"></canvas><span></span><small>${flowersOf(b).length} ${flowersOf(b).length === 1 ? 'flower' : 'flowers'}${b.shared ? ' · shared' : ''}${!edgeOf(b) && ownsBag(b) ? ' · <button class="drawedge" data-edge="' + b.id + '">✎ draw its edge</button>' : ''}</small></div>`).join('')}
+    ${canUpload ? `<button class="tray new" data-act="newbag"><canvas aria-hidden="true"></canvas><b class="plus">+</b><span>new patch</span></button>` : ''}</div>`;
+  const nt = gEl.querySelector('.tray.new canvas'); if (nt) drawTray(nt, null, true);
+  list.forEach(b => { const t = gEl.querySelector(`[data-open="${b.id}"]`); drawTray(t.querySelector('canvas'), b);
+    t.querySelector('span').textContent = b.name || 'patch'; if (b.shared) t.querySelector('span').insertAdjacentHTML('beforeend', '<span class="two" title="shared">∘∘</span>');
+    t.setAttribute('aria-label', 'open ' + (b.name || 'patch')); });
+}
+$('#garden').addEventListener('keydown', e => { const t = e.target.closest('[data-open]'); if (t && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); go(t.dataset.open); } });
+$('#garden').addEventListener('click', async e => {
+  const de = e.target.closest('[data-edge]'); if (de) { e.stopPropagation(); return redrawEdge(bags[de.dataset.edge]); }
+  const t = e.target.closest('[data-open]'); if (t) return go(t.dataset.open);
+  if (e.target.closest('[data-act=newbag]')) newPatch();
+});
+function goGarden(){
+  walk = null; stopAll(); closeCard(); view = 'garden';
+  try { history.replaceState(null, '', '#garden'); } catch {}
+  joinRoomFor(null); render();
+}
+setInterval(() => { if (view === 'garden') renderGarden(); }, 60000);
+
+/* =================== tabs, who's here =================== */
+function render(){
+  const inGarden = view === 'garden' || !cur();
+  $('#garden').hidden = !inGarden; cv.hidden = inGarden;
+  ['#testbtn', '#edgeL', '#edgeR', '#label'].forEach(q => { if (inGarden) $(q).hidden = true; });
+  if (inGarden) {
+    $('#bags').innerHTML = `<span class="gtitle">garden</span>`;
+    $('#add').hidden = true; $('#share').hidden = true; $('#hint').hidden = true; $('#here').innerHTML = '';
+    $('#walk').hidden = !Object.values(bags).some(b => flowersOf(b).length); paintWalk();
+    renderGarden(); return;
+  }
+  $('#testbtn').hidden = false;
+  // open patches, like tabs: the one you're in is solid, the others faded; × closes one
+  if (!openTabs.includes(curId)) { openTabs.push(curId); saveTabs(); }
+  const open = openTabs.filter(id => bags[id]);
+  $('#bags').innerHTML = `<button class="tab back" data-act="garden">← garden</button>` + open.map(id =>
+    `<span class="ptab-wrap${id === curId ? ' on' : ''}"><button class="tab ptab" data-bag="${id}" aria-current="${id === curId}"><canvas aria-hidden="true"></canvas><span class="pin"><span class="pname"></span><span class="tclose" data-close="${id}" role="button" aria-label="Close tab" title="close">×</span></span></button></span>`).join('');
+  open.forEach(id => { const x = bags[id], t = $(`[data-bag="${id}"]`), tl = t.querySelector('.pname'); tl.textContent = x.name || 'patch';
+    if (x.shared) tl.insertAdjacentHTML('beforeend', '<span class="two" title="shared">∘∘</span>');
+    requestAnimationFrame(() => paintTab(t.querySelector('canvas'), x, t)); });
+  const canAddHere = !!cur() && canUpload && canTendBag(cur());
+  $('#add').hidden = !canAddHere;
+  $('#walk').hidden = !flowersOf(cur()).length; paintWalk();
+  $('#share').hidden = !(store?.shares && ownsBag(cur()));
+  $('#hint').hidden = !(canAddHere && !flowersOf(cur()).length);
+  renderHere();
+}
+function peopleHere(){
+  const m = new Map();
+  if (live) live.peers().forEach(p => { if (p.kind !== 'viewer') return; const k = T.tabs ? p.peer : (p.by || p.peer); if (!m.has(k)) m.set(k, p); });
+  else m.set('me', { isMe: true, by: null, peer: 'me' });
+  if (T.fake) m.set('pretend', { isMe: false, by: null, peer: 'pretend', pretend: true });
+  return [...m.values()];
+}
+const accessOf = b => b?.shared ? (b.access || 'together') : 'private';
+const together = () => accessOf(cur()) !== 'together' || peopleHere().length >= 2;
+const canTendBag = b => ownsBag(b) || accessOf(b) === 'tend';
+async function renderHere(){
+  const b = cur(), h = $('#here');
+  if (!b?.shared) { h.innerHTML = ''; return; }
+  const ps = peopleHere(); const ids = ps.map(p => p.by).filter(Boolean);
+  const prof = userNS && ids.length ? await userNS.profiles(ids) : {};
+  h.innerHTML = '';
+  ps.slice(0, 6).forEach(p => { const d = document.createElement('div'); d.className = 'dot';
+    const pr = p.by && prof[p.by]; if (pr?.avatarUrl) { const i = new Image(); i.src = pr.avatarUrl; i.alt = pr.name || ''; d.appendChild(i); }
+    if (!pr?.avatarUrl && p.name) { d.textContent = p.name[0].toUpperCase(); d.style.cssText += 'display:grid;place-items:center;font-size:13px'; }
+    d.title = pr?.name || p.name || (p.isMe ? 'you' : p.pretend ? 'pretend friend' : 'someone'); if (p.pretend) d.style.background = 'var(--blue)'; h.appendChild(d); });
+  if (ps.length < 2) { const d = document.createElement('div'); d.className = 'dot empty'; d.title = 'waiting for someone'; h.appendChild(d); }
+}
+let roomKey = null;
+async function joinRoomFor(b){
+  const key = b?.shared ? b.id : null;
+  if (key === roomKey) { renderHere(); return; }
+  roomKey = key;
+  if (live) { const old = live; live = null; Promise.resolve().then(() => old.leave?.()).catch(() => {}); }
+  if (!room || !key) { renderHere(); return; }
+  try {
+    const r = await room.join('b-' + b.id.toLowerCase().replace(/[^a-z0-9]/g, ''));
+    if (roomKey !== b.id) { r.leave(); return; }
+    live = r;
+    r.onPeers(() => { renderHere(); if (voices.size && !together()) stopAll(); });
+    renderHere();
+    r.on('play', m => { const d = m.data || {}; if (typeof d.fid === 'string') startPlay(d.fid, Number(d.at) || now()); });
+    r.on('stop', m => { const d = m.data || {}; typeof d.fid === 'string' ? stopOne(d.fid) : stopAll(); });
+  } catch { roomKey = null; say('can’t connect to listen together right now'); }
+  renderHere();
+}
+
+/* =================== listening =================== */
+/* every flower is its own voice: tap to start it, tap again to stop it. Tap several and they sound together. */
+const voices = new Map();            // fid -> { audio, t, at }
+let lastStarted = null;
+const realPeople = () => live ? new Set(live.peers().filter(p => p.kind === 'viewer').map(p => T.tabs ? p.peer : (p.by || p.peer))).size : 1;
+function tapKey(key){
+  const b = cur(); if (!b) return false;
+  const playingIt = voices.has(key);
+  if (b.shared) {
+    if (!playingIt && !together()) { say('waiting for someone to join you'); return false; }
+    if (live && realPeople() >= 2) { live.emit(playingIt ? 'stop' : 'play', { fid: key, at: now() + 700 }).catch(() => say('only people who can use this patch can start a sound')); }
+    else (playingIt ? stopOne(key) : startPlay(key, now()));       // only the pretend friend is here
+  } else (playingIt ? stopOne(key) : startPlay(key, now()));
+  return !playingIt;
+}
+function tap(f){
+  const b = cur(); if (!b) return;
+  if (walk) { const i = walk.steps.findIndex(st => st.key === f.id && st.bag === b.id); if (i >= 0) { walk.jump = i; stopAll(); return; } }
+  if (!tapKey(f.id)) return;
+  const plays = (f.plays || 0) + 1;                 // one count per start, for everyone
+  f.plays = plays; f.lastPlayed = now();
+  Promise.resolve(store.countPlay ? store.countPlay(b, f.id) : store.patchFlower(b, f.id, { plays, lastPlayed: f.lastPlayed })).catch(() => {});
+}
+async function startPlay(fid, at){
+  const [id, nid] = fid.split('~'), f = cur()?.flowers?.[id]; if (!f || voices.has(fid)) return;
+  const n = nid ? notesOf(f).find(x => x.id === nid) : null; if (nid && !n) return;
+  const v = { audio: new Audio(), t: null, at }; voices.set(fid, v); lastStarted = fid;
+  if (!nid) f.lastPlayed = Math.max(f.lastPlayed || 0, now());
+  const src = await store.audioSrc(n || f);
+  if (voices.get(fid) !== v) return;
+  if (!src) { say('this recording isn’t here'); return stopOne(fid); }
+  v.audio.src = src;
+  v.audio.onended = () => { if (voices.get(fid) === v) stopOne(fid); };
+  v.t = setTimeout(() => v.audio.play().catch(() => { v.blocked = true; say('tap anywhere to hear it'); }), Math.max(0, at - now()));
+}
+function stopOne(fid){ const v = voices.get(fid); if (!v) return; clearTimeout(v.t); v.audio.pause(); voices.delete(fid); if (lastStarted === fid) lastStarted = [...voices.keys()].pop() || null; }
+function stopAll(){ [...voices.keys()].forEach(stopOne); }
+/* browsers only allow sound after a tap: if a friend started something before you touched the page, catch up on your first tap */
+document.addEventListener('pointerdown', () => {
+  voices.forEach(v => { if (v.blocked) { v.blocked = false; try { v.audio.currentTime = Math.max(0, (now() - v.at) / 1000); } catch {} v.audio.play().catch(() => {}); } });
+}, true);
+let sayT;
+function say(t, stay, ms = 2800){ const w = $('#words'); w.textContent = t; w.hidden = false; clearTimeout(sayT); if (!stay) sayT = setTimeout(() => w.hidden = true, ms); }
+$('#share').addEventListener('click', () => openShare());
+/* share, like a shared doc: pick who can come in and what they can do, then copy the link */
+const ACCESS = {
+  private:  { label: 'only me',         hint: 'nobody else can open it' },
+  together: { label: 'listen together', hint: 'plays only when you’re both here' },
+  listen:   { label: 'can listen',      hint: 'can play it any time, can’t change anything' },
+  tend:     { label: 'can tend',        hint: 'can also add, replant and rename' },
+};
+function openShare(){
+  const b = cur(); if (!b || !ownsBag(b)) return;
+  closeCard();
+  const url = location.href.split('#')[0] + '#b-' + b.id;
+  const c = document.createElement('div'); c.className = 'card share'; c.id = 'card'; c.setAttribute('role', 'dialog'); c.setAttribute('aria-label', 'Share');
+  c.innerHTML = `<button class="xbtn" data-a="x" aria-label="Close">×</button>
+    <div class="sh-title">share “<span id="shName"></span>”</div>
+    <div class="sh-opts" role="radiogroup" aria-label="Who can do what">${Object.entries(ACCESS).map(([k, v]) =>
+      `<button class="sh-opt" role="radio" data-acc="${k}"><i></i><span><b>${v.label}</b><small>${v.hint}</small></span></button>`).join('')}</div>
+    <div class="sh-link"><input type="text" id="shUrl" readonly aria-label="Link"><button class="go" data-a="copy">copy link</button></div>
+    <div class="soft sh-note" id="shNote"></div>`;
+  document.body.appendChild(c);
+  $('#shName').textContent = b.name || 'patch'; $('#shUrl').value = url;
+  const paint = () => {
+    const acc = accessOf(cur() || b);
+    c.querySelectorAll('.sh-opt').forEach(o => o.setAttribute('aria-checked', String(o.dataset.acc === acc)));
+    c.querySelector('.sh-link').classList.toggle('off', acc === 'private');
+    $('#shNote').textContent = acc === 'private' ? 'pick who can come in, then copy the link'
+      : 'anyone with the link can come in' + (store.kind === 'cloud' ? ' · on Claude they also need access from Share at the top of the page' : '');
+  };
+  paint();
+  c.addEventListener('click', async e => {
+    const o = e.target.closest('.sh-opt'), a = e.target.closest('[data-a]')?.dataset.a;
+    if (o) {
+      const acc = o.dataset.acc; if (acc === accessOf(b)) return;
+      c.querySelectorAll('.sh-opt').forEach(x => x.setAttribute('aria-checked', String(x === o)));
+      try { await store.setAccess(b, acc); b.shared = acc !== 'private'; if (b.shared) b.access = acc; paint(); render(); joinRoomFor(cur()); }
+      catch (err) { say('couldn’t change sharing · ' + (err?.message || ''), false, 7000); paint(); }
+    }
+    if (a === 'copy') {
+      if (accessOf(b) === 'private') { try { await store.setAccess(b, 'together'); b.shared = true; b.access = 'together'; paint(); render(); joinRoomFor(cur()); } catch (err) { return say('couldn’t share · ' + (err?.message || ''), false, 7000); } }
+      let ok = false; try { await navigator.clipboard.writeText(url); ok = true; } catch {}
+      if (!ok) { const i = $('#shUrl'); i.focus(); i.select(); try { ok = document.execCommand('copy'); } catch {} }
+      e.target.textContent = ok ? 'copied ✓' : 'select & copy'; setTimeout(() => { if (e.target.isConnected) e.target.textContent = 'copy link'; }, 2200);
+    }
+    if (a === 'x') closeCard();
+  });
+  c.addEventListener('keydown', e => { if (e.key === 'Escape') closeCard(); });
+  $('#shUrl').addEventListener('focus', e => e.target.select());
+}
+
+/* =================== adding recordings =================== */
+function openSpot(b){
+  const xs = flowersOf(b).map(f => f.x).sort((a, c) => a - c);
+  if (!xs.length) return .3 + Math.random() * .4;
+  const spots = [{ at: xs[0] / 2, room: xs[0] }, { at: (xs[xs.length - 1] + 1) / 2, room: 1 - xs[xs.length - 1] }];   // the two ends
+  for (let i = 1; i < xs.length; i++) spots.push({ at: (xs[i] + xs[i - 1]) / 2, room: (xs[i] - xs[i - 1]) / 2 });       // between neighbours
+  const best = spots.sort((a, c) => c.room - a.room)[0];
+  return clamp(best.at + (Math.random() - .5) * best.room * .5, 0, 1);   // not quite even: no order to it
+}
+function leastUsedColors(b){
+  const n = PAIRS.map(() => 0); flowersOf(b).forEach(f => { const i = PAIRS.findIndex(p => p.join() === colorsOf(f).join()); if (i >= 0) n[i]++; });
+  const min = Math.min(...n), opts = n.map((v, i) => v === min ? i : -1).filter(i => i >= 0);
+  return PAIRS[opts[Math.floor(Math.random() * opts.length)]];
+}
+async function addFiles(files){
+  const b = cur(); if (!b) return;
+  files = files.filter(f => f.type.startsWith('audio/') || f.type.startsWith('video/') || /\.(m4a|mp3|wav|ogg|aac|flac|webm|opus|mp4)$/i.test(f.name));
+  if (!files.length) return;
+  // 1. draw (or keep) a blossom for each recording
+  const plan = []; let rest = false;
+  for (const [i, file] of files.entries()) {
+    const color = leastUsedColors({ flowers: Object.fromEntries([...flowersOf(b), ...plan].map(f => [f.id, f])) });
+    const f = { id: uid(), name: '', file: file.name, color, plays: 0, lastPlayed: now(), added: now() + i, by: me };
+    if (!rest) {
+      const res = await drawPad({ name: f.name, grid: centerGrid(patternGrid(HEADS[0], color)), step: files.length > 1 ? `${i + 1} of ${files.length}` : '', more: files.length - i - 1 });
+      if (!res) { if (!plan.length) return; break; }       // closed: plant what's drawn so far
+      f.name = res.name || ''; if (res.draw) f.draw = res.draw; rest = res.rest;
+    }
+    plan.push({ ...f, file });
+  }
+  // 2. plant them
+  $('#add').classList.add('busy');
+  let done = 0, failed = [];
+  for (const [i, p] of plan.entries()) {
+    const { file, ...f } = p; f.x = openSpot(b);
+    const tag = plan.length > 1 ? `${i + 1} of ${plan.length}` : '';
+    say(`planting ${tag} …`, true);
+    try {
+      Object.assign(f, await store.putAudio(file, f.id, (k, n) => say(`planting ${tag} · big file, piece ${k} of ${n} …`, true)));
+      b.flowers = { ...(b.flowers || {}), [f.id]: f };
+      await store.addFlower(b, f); done++; pan.to = f.id;
+      render();
+    } catch (e) { failed.push(`${file.name}${e?.code === 'quota_or_state' ? ' (storage is full)' : e?.code === 'unsupported_type' ? ' (try it as .m4a)' : ''}`); }
+  }
+  $('#add').classList.remove('busy'); render();
+  say(failed.length ? `planted ${done} · couldn’t add: ${failed.join(', ')}` : `planted ${done} ${done === 1 ? 'flower' : 'flowers'}`, false, failed.length ? 9000 : 2800);
+}
+
+/* the drawing pad: 9×9 pixels. Starts with a blossom so you can keep it, change it, or wipe it and draw your own. */
+const PAD = 9;
+function centerGrid(pg){ const top = Math.max(0, Math.floor((PAD - pg.length) / 2)), left = Math.max(0, Math.floor((PAD - (pg[0]?.length || 0)) / 2));
+  return Array.from({ length: PAD }, (_, j) => Array.from({ length: PAD }, (_, i) => pg[j - top]?.[i - left] ?? '.').join('')); }
+function drawPad({ name, grid, step, more, edit }){
+  return new Promise(resolve => {
+    closeCard();
+    const c = document.createElement('div'); c.className = 'card pad'; c.id = 'card';
+    c.setAttribute('role', 'dialog'); c.setAttribute('aria-label', 'Draw its flower');
+    c.innerHTML = `${step ? `<div class="step">${step}</div>` : ''}
+      <input type="text" id="padName" aria-label="Name" placeholder="name the flower">
+      <canvas id="padCv" width="${PAD}" height="${PAD}" aria-label="Drawing pad, 9 by 9 pixels"></canvas>
+      <div class="sw" id="sw">${PALETTE.map((col, i) => `<button data-c="${i}" style="background:${col}" aria-label="color ${i + 1}" aria-pressed="${i === 0}"></button>`).join('')}<button class="eraser" data-c="." aria-label="eraser" aria-pressed="false"></button></div>
+      <div class="row"><button data-a="clear">clear</button><button data-a="surprise">surprise me</button></div>
+      <div class="row"><button class="go" data-a="plant">${edit ? 'done' : 'plant'}</button>${more ? `<button data-a="rest">plant the other ${more} as they are</button>` : ''}<button data-a="x">cancel</button></div>`;
+    document.body.appendChild(c);
+    const nm = $('#padName'); nm.value = name;
+    let g = (grid || []).slice(0, PAD).map(r => (r + '.'.repeat(PAD)).slice(0, PAD)); while (g.length < PAD) g.push('.'.repeat(PAD));
+    g = g.map(r => [...r]);
+    const pc = $('#padCv'), x = pc.getContext('2d');
+    const paint = () => { x.clearRect(0, 0, PAD, PAD); g.forEach((row, j) => row.forEach((ch, i) => { if (ch !== '.') { x.fillStyle = PALETTE[+ch]; x.fillRect(i, j, 1, 1); } })); };
+    paint();
+    let colr = '0', stroke = null;
+    c.querySelector('#sw').addEventListener('click', e => { const b = e.target.closest('[data-c]'); if (!b) return; colr = b.dataset.c; c.querySelectorAll('#sw button').forEach(o => o.setAttribute('aria-pressed', String(o === b))); });
+    const cell = e => { const r = pc.getBoundingClientRect(); return [Math.floor((e.clientX - r.left) / r.width * PAD), Math.floor((e.clientY - r.top) / r.height * PAD)]; };
+    const put = (i, j) => { if (i < 0 || j < 0 || i >= PAD || j >= PAD) return; g[j][i] = stroke; paint(); };
+    pc.addEventListener('pointerdown', e => { pc.setPointerCapture(e.pointerId); const [i, j] = cell(e);
+      stroke = colr !== '.' && g[j]?.[i] === colr ? '.' : colr;   // tapping a pixel of the same color clears it
+      put(i, j); });
+    pc.addEventListener('pointermove', e => { if (stroke !== null) put(...cell(e)); });
+    pc.addEventListener('pointerup', () => stroke = null);
+    const finish = v => { c.remove(); resolve(v); };
+    const out = () => g.map(r => r.join(''));
+    c.addEventListener('click', e => {
+      const a = e.target.dataset.a; if (!a) return;
+      if (a === 'clear') { g = g.map(r => r.map(() => '.')); paint(); }
+      if (a === 'surprise') { const pair = PAIRS[Math.floor(Math.random() * PAIRS.length)], pat = [HEADS[0], HEADS[1], HEADS[3]][Math.floor(Math.random() * 3)];
+        const pg = patternGrid(pat, pair), top = Math.floor((PAD - pg.length) / 2), left = Math.floor((PAD - pg[0].length) / 2);
+        g = g.map(r => r.map(() => '.')); pg.forEach((row, j) => [...row].forEach((ch, i) => g[top + j][left + i] = ch)); paint(); }
+      if (a === 'plant' || a === 'rest') { const d = out(); finish({ name: nm.value.trim(), draw: d.some(r => /[0-9]/.test(r)) ? d : null, rest: a === 'rest' }); }
+      if (a === 'x') finish(null);
+    });
+    c.addEventListener('keydown', e => { if (e.key === 'Escape') finish(null); });
+    nm.focus();
+  });
+}
+$('#add').addEventListener('click', async () => { const files = await chooseAudio({ many: true }); if (files?.length) addFiles(files); });
+
+/* =================== record or upload =================== */
+const AUDIO_ACCEPT = 'audio/*,.m4a,.mp3,.wav,.ogg,.webm,.aac,.flac,.opus';
+function chooseAudio({ many, title }){
+  return new Promise(resolve => {
+    closeCard();
+    const c = document.createElement('div'); c.className = 'card pad'; c.id = 'card'; c.setAttribute('role', 'dialog');
+    c.className = 'card os pad'; c.setAttribute('aria-label', 'Record or upload');
+    c.innerHTML = `<button class="xbtn" data-a="x" aria-label="Close">×</button><div class="tiles">
+        <button class="tile icon" data-a="rec" title="record" aria-label="Record">${pixIcon(MIC, '#741b47')}</button>
+        <label class="tile icon" title="upload" aria-label="Upload">${pixIcon(UP, '#4c1130')}<input type="file" id="pickIn" accept="${AUDIO_ACCEPT}" ${many ? 'multiple' : ''}></label></div>`;
+    document.body.appendChild(c);
+    let done = false; const finish = v => { if (done) return; done = true; c.remove(); resolve(v); };
+    $('#pickIn').addEventListener('change', e => finish([...e.target.files]));
+    c.addEventListener('click', async e => {
+      const a = e.target.closest('[data-a]')?.dataset.a;
+      if (a === 'x') finish(null);
+      if (a === 'rec') { done = true; c.remove(); const f = await recorder(); resolve(f ? [f] : null); }
+    });
+    c.addEventListener('keydown', e => { if (e.key === 'Escape') finish(null); });
+  });
+}
+/* minimal pixel icons */
+/* =================== walk: listen to the landscape, oldest planted first =================== */
+const FEET = ['........X.X.', '............', '........XXX.', '.......XXXXX', '.......XXXXX', '.X.X....XXX.', '............', '.XXX....XX..', 'XXXXX...XX..', 'XXXXX.......', '.XXX........', '............', '.XX.........', '.XX.........'];
+const STOPI = ['...........', '...........', '..XXXXXXX..', '..XXXXXXX..', '..XXXXXXX..', '..XXXXXXX..', '..XXXXXXX..', '..XXXXXXX..', '..XXXXXXX..', '...........', '...........'];
+let walk = null;
+function paintWalk(){ const w = $('#walk'); w.innerHTML = pixIcon(walk ? STOPI : FEET, walk ? '#741b47' : '#4c1130') + `<span>${walk ? 'stop' : 'walk'}</span>`; w.classList.toggle('on', !!walk);
+  w.setAttribute('aria-label', walk ? 'Stop walking' : (view === 'garden' ? 'Walk through the whole garden' : 'Walk through this patch')); }
+function walkSteps(scope){
+  const flowers = [];
+  (scope === 'garden' ? Object.values(bags) : [cur()]).forEach(b => flowersOf(b).forEach(f => flowers.push({ b, f })));
+  flowers.sort((a, c) => (a.f.added || 0) - (c.f.added || 0));
+  // one timeline in planting order: pollen plays when it was added, going back to its flower then
+  const steps = [];
+  flowers.forEach(({ b, f }) => {
+    steps.push({ bag: b.id, key: f.id, flower: f.id, kind: 'flower', at: f.added || 0 });
+    notesOf(f).forEach(n => steps.push({ bag: b.id, key: f.id + '~' + n.id, flower: f.id, kind: n.kind || 'sound', note: n, at: n.added || f.added || 0 }));
+  });
+  return steps.sort((a, c) => a.at - c.at);
+}
+const waitFor = (test, ms) => new Promise(res => { const t0 = now(), iv = setInterval(() => { if (test() || now() - t0 > ms) { clearInterval(iv); res(); } }, 200); });
+async function startWalk(){
+  if (walk) return stopWalk();
+  const scope = view === 'garden' ? 'garden' : 'patch', steps = walkSteps(scope);
+  if (!steps.length) return;
+  const me_ = walk = { steps, i: 0, jump: null }; paintWalk();
+  say(scope === 'garden' ? 'walking through the garden, oldest first' : 'walking through this patch, oldest first');
+  while (walk === me_ && me_.i < steps.length) {
+    const st = steps[me_.i];
+    if (curId !== st.bag || view !== 'patch') { go(st.bag); await new Promise(r => setTimeout(r, 600)); if (walk !== me_) break; }
+    const b = cur(), f = b?.flowers?.[st.flower];
+    if (f) {
+      pan.to = f.id;
+      if (st.kind === 'flower' || st.kind === 'sound') {
+        if (b.shared && accessOf(b) === 'together' && !together()) { say('waiting for someone to join you'); await waitFor(() => walk !== me_ || together(), 600000); if (walk !== me_) break; }
+        if (b.shared && live && realPeople() >= 2) live.emit('play', { fid: st.key, at: now() + 700 }).catch(() => {});   // the walk plays for both of you
+        else startPlay(st.key, now());
+        if (st.kind === 'flower') { f.plays = (f.plays || 0) + 1; f.lastPlayed = now(); Promise.resolve(store.countPlay ? store.countPlay(b, f.id) : store.patchFlower(b, f.id, { plays: f.plays, lastPlayed: f.lastPlayed })).catch(() => {}); }
+        await waitFor(() => voices.has(st.key), 3000);                                  // it starts…
+        await waitFor(() => walk !== me_ || me_.jump != null || !voices.has(st.key), 30 * 60000);   // …and plays to its end
+      } else {
+        const nb = noteBoxes.find(x => x.key === st.key) || { f, n: st.note, key: st.key };
+        openNote(nb); await waitFor(() => walk !== me_ || me_.jump != null, st.kind === 'video' ? 12000 : 6000); closeCard();
+      }
+    }
+    if (walk !== me_) break;
+    if (me_.jump != null) { me_.i = me_.jump; me_.jump = null; continue; }
+    me_.i++;
+    await new Promise(r => setTimeout(r, 500));                                           // a breath between
+  }
+  if (walk === me_) { walk = null; paintWalk(); say('the walk is over'); }
+}
+function stopWalk(){ walk = null; stopAll(); closeCard(); paintWalk(); }
+$('#walk').addEventListener('click', startWalk);
+const MIC = ['..XXX..', '.XXXXX.', '.XXXXX.', '.XXXXX.', 'X.XXX.X', 'X.....X', '.XX.XX.', '...X...', '.XXXXX.'];
+const UP = ['...X...', '..XXX..', '.X.X.X.', '...X...', '...X...', 'X.....X', 'XXXXXXX'];
+const pixIcon = (rows, col) => `<svg viewBox="0 0 ${rows[0].length} ${rows.length}" aria-hidden="true" shape-rendering="crispEdges">${rows.map((r, j) => [...r].map((ch, i) => ch === 'X' ? `<rect x="${i}" y="${j}" width="1" height="1" fill="${col}"/>` : '').join('')).join('')}</svg>`;
+/* the recorder: tap to start, tap to stop, listen back, keep it */
+function recorder(){
+  return new Promise(resolve => {
+    const c = document.createElement('div'); c.className = 'card pad'; c.id = 'card'; c.setAttribute('role', 'dialog'); c.setAttribute('aria-label', 'Record');
+    c.innerHTML = `<div class="rec"><button class="recbtn" data-a="rec" aria-label="Start recording"><i></i></button><span id="recT">0:00</span></div>
+      <div class="soft" id="recNote">tap to start · tap again to stop</div>
+      <div class="row"><button class="go" data-a="keep" hidden>keep it</button><button data-a="listen" hidden>listen back</button><button data-a="again" hidden>again</button><button data-a="x">cancel</button></div>`;
+    document.body.appendChild(c);
+    let stream = null, mr = null, chunks = [], blob = null, t0 = 0, tick = null, preview = null;
+    const note = t => $('#recNote').textContent = t;
+    const show = (k, on) => c.querySelector(`[data-a=${k}]`).hidden = !on;
+    const mime = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/webm', 'audio/ogg'].find(m => window.MediaRecorder?.isTypeSupported?.(m)) || '';
+    const release = () => { stream?.getTracks().forEach(t => t.stop()); stream = null; };
+    const finish = v => { clearInterval(tick); try { mr?.state === 'recording' && mr.stop(); } catch {} release(); preview?.pause(); c.remove(); resolve(v); };
+    async function start(){
+      try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+      catch { note(location.hostname.endsWith('claude.ai') || window.claude ? 'recording works on your own site · here, use upload' : 'the microphone isn’t allowed · check the browser’s permission and try again'); return; }
+      chunks = []; blob = null; mr = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+      mr.ondataavailable = e => e.data.size && chunks.push(e.data);
+      mr.onstop = () => { blob = new Blob(chunks, { type: (mr.mimeType || mime || 'audio/webm').split(';')[0] }); release();
+        ['keep', 'listen', 'again'].forEach(k => show(k, true)); note('got it · keep it, listen back, or record again'); };
+      mr.start(250); t0 = now();
+      c.querySelector('.recbtn').classList.add('on'); note('recording · tap to stop');
+      tick = setInterval(() => $('#recT').textContent = mmss((now() - t0) / 1000), 250);
+      ['keep', 'listen', 'again'].forEach(k => show(k, false));
+    }
+    function stop(){ clearInterval(tick); c.querySelector('.recbtn').classList.remove('on'); try { mr.stop(); } catch {} }
+    c.addEventListener('click', e => {
+      const a = e.target.closest('[data-a]')?.dataset.a; if (!a) return;
+      if (a === 'rec') mr?.state === 'recording' ? stop() : start();
+      if (a === 'again') { preview?.pause(); $('#recT').textContent = '0:00'; start(); }
+      if (a === 'listen' && blob) { preview?.pause(); preview = new Audio(URL.createObjectURL(blob)); preview.play().catch(() => {}); }
+      if (a === 'keep' && blob) {
+        const d = new Date(), ext = /mp4/.test(blob.type) ? 'm4a' : /ogg/.test(blob.type) ? 'ogg' : 'webm';
+        finish(new File([blob], `recording ${d.getDate()} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]} ${d.getHours()}.${String(d.getMinutes()).padStart(2, '0')}.${ext}`, { type: blob.type }));
+      }
+      if (a === 'x') finish(null);
+    });
+  });
+}
+const mmss = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+document.addEventListener('dragover', e => e.preventDefault());
+document.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer?.files?.length && !$('#add').hidden) addFiles([...e.dataTransfer.files]); });
+
+/* =================== tap, hold =================== */
+let downOn = null, hold = null, held = false;
+let press = null, replant = null, justReplanted = false;
+function canTend(f){ const b = cur(); return !!b && (canTendBag(b) || (f.by && f.by === me)); }
+cv.addEventListener('pointermove', e => {
+  if (press && !replant && Math.hypot(e.clientX - press.x, e.clientY - press.y) > 7 && canTend(press.f)) { replant = { f: press.f }; clearTimeout(hold); try { cv.setPointerCapture(e.pointerId); } catch {} closeCard(); }
+  if (replant) { replant.cx = e.clientX; const wx = e.clientX / S + Math.floor(pan.x); replant.f.x = clamp((wx - 8) / Math.max(1, GW - 16), 0, 1); hover = replant.f; cv.classList.add('over'); return; }
+  if (pan.drag) return panMove(e); hoverNote = pickNote(e.clientX, e.clientY); hover = hoverNote ? null : pick(e.clientX, e.clientY); cv.classList.toggle('over', !!(hover || hoverNote)); });
+cv.addEventListener('pointerleave', () => { hover = null; hoverNote = null; });
+cv.addEventListener('pointerdown', e => { const nb = pickNote(e.clientX, e.clientY); if (nb) { downOn = { note: nb }; held = false; hold = setTimeout(() => { held = true; (nb.n.kind || 'sound') === 'sound' ? editNote(nb, e.clientX, e.clientY) : openNote(nb); }, 550); return; }
+  const f = downOn = pick(e.clientX, e.clientY); if (f) press = { f, x: e.clientX, y: e.clientY }; if (!f) { closeCard(); if (GW > LW) { pan.drag = { x: e.clientX, px: pan.x }; cv.setPointerCapture(e.pointerId); } return; } held = false;
+  hold = setTimeout(() => { held = true; editFlower(f.id, e.clientX, e.clientY); }, 550); });
+['pointerup', 'pointerleave', 'pointercancel'].forEach(t => cv.addEventListener(t, () => {
+  clearTimeout(hold); pan.drag = null; press = null;
+  if (replant) { const f = replant.f, b = cur(); replant = null; justReplanted = true; if (b) Promise.resolve(store.patchFlower(b, f.id, { x: f.x })).catch(() => {}); say('replanted'); }
+}));
+cv.addEventListener('wheel', e => { if (GW <= LW) return; const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY; pan.x = clamp(pan.x + d / S, 0, GW - LW); e.preventDefault(); }, { passive: false });
+['edgeL', 'edgeR'].forEach((id, i) => $('#' + id).addEventListener('click', () => { pan.x = clamp(pan.x + (i ? 1 : -1) * LW * .6, 0, Math.max(0, GW - LW)); }));
+cv.addEventListener('click', () => { const f = downOn; downOn = null; if (justReplanted) { justReplanted = false; return; } if (!f || held) return; closeCard(); if (f.note) return (f.note.n.kind || 'sound') === 'sound' ? tapKey(f.note.key) : openNote(f.note); const fl = cur()?.flowers?.[f.id]; if (fl) tap(fl); });
+cv.addEventListener('contextmenu', e => { const nb = pickNote(e.clientX, e.clientY); if (nb) { e.preventDefault(); return (nb.n.kind || 'sound') === 'sound' ? editNote(nb, e.clientX, e.clientY) : openNote(nb); } const f = pick(e.clientX, e.clientY); if (!f) return; e.preventDefault(); editFlower(f.id, e.clientX, e.clientY); });
+// keyboard: left/right to move between flowers, enter to play, e to edit
+let kIdx = -1;
+document.addEventListener('keydown', e => {
+  if (e.target.closest('input,.card') || $('.card.pad')) return;
+  const fs = boxes.map(b => b.f); if (!fs.length) return;
+  if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { kIdx = (kIdx + (e.key === 'ArrowRight' ? 1 : -1) + fs.length) % fs.length; hover = fs[kIdx]; pan.to = hover.id; }
+  if ((e.key === 'Enter' || e.key === ' ') && hover) { e.preventDefault(); tap(hover); }
+  if (e.key === 'e' && hover) { const bx = boxes.find(b => b.f.id === hover.id); editFlower(hover.id, (bx.bx - Math.floor(pan.x)) * S, bx.top * S); }
+});
+
+/* =================== small cards =================== */
+function card(x, y, html){
+  closeCard(); const c = document.createElement('div'); c.className = 'card'; c.id = 'card';
+  c.style.left = clamp(x - 125, 16, innerWidth - 266) + 'px'; c.style.top = clamp(y, 16, innerHeight - 220) + 'px';
+  c.innerHTML = html; document.body.appendChild(c); return c;
+}
+function closeCard(){ $('#card')?.remove(); }
+const short = (t, n) => (t = String(t || '')).length > n ? t.slice(0, n - 1) + '…' : t;
+const OS_SHAPES = { sound: ['.X.', 'XoX', '.X.'], words: ['X.X', '.o.', 'X.X'], photo: ['XXX', 'XoX', 'XXX'], video: ['X.X', 'XoX', '.X.'] };
+const OS_COLORS = { sound: '#c27ba0', words: '#8e7cc3', photo: '#e69138', video: '#741b47' };
+const osIcon = kind => `<svg viewBox="0 0 3 3" aria-hidden="true" shape-rendering="crispEdges">${OS_SHAPES[kind].map((row, j) => [...row].map((ch, i) => ch === '.' ? '' : `<rect x="${i}" y="${j}" width="1" height="1" fill="${ch === 'o' ? '#fff2cc' : OS_COLORS[kind]}"/>`).join('')).join('')}</svg>`;
+/* pollen: a small flower on the stem holding a sound, some words, a photo or a video */
+function annotate(b, f){
+  closeCard();
+  const c = document.createElement('div'); c.className = 'card os'; c.id = 'card'; c.setAttribute('role', 'dialog'); c.setAttribute('aria-label', 'Add pollen');
+  c.innerHTML = `<button class="xbtn" data-a="x" aria-label="Close">×</button><div class="tiles">
+    <button class="tile" data-a="sound">${osIcon('sound')}sound</button>
+    <button class="tile" data-a="words">${osIcon('words')}words</button>
+    <label class="tile">${osIcon('photo')}photo<input type="file" id="phIn" accept="image/*"></label>
+    <label class="tile">${osIcon('video')}video<input type="file" id="viIn" accept="video/*"></label></div>`;
+  document.body.appendChild(c);
+  const bx0 = boxes.find(x => x.f.id === f.id), ax = bx0 ? (bx0.bx - Math.floor(pan.x)) * S : innerWidth / 2, ay = bx0 ? bx0.top * S : innerHeight / 2;
+  c.style.left = clamp(ax - c.offsetWidth / 2, 16, innerWidth - c.offsetWidth - 16) + 'px';
+  c.style.top = clamp(ay - c.offsetHeight - 16, 16, innerHeight - c.offsetHeight - 16) + 'px';
+  $('#phIn').addEventListener('change', e => { const f0 = e.target.files[0]; c.remove(); if (f0) addFileNote(b, f, f0, 'photo'); });
+  $('#viIn').addEventListener('change', e => { const f0 = e.target.files[0]; c.remove(); if (f0) addFileNote(b, f, f0, 'video'); });
+  c.addEventListener('click', async e => {
+    const a = e.target.closest('[data-a]')?.dataset.a;
+    if (a === 'x') c.remove();
+    if (a === 'sound') { c.remove(); const files = await chooseAudio({ title: f.name ? 'a sound on “' + short(f.name, 22) + '”' : '' }); if (files?.[0]) addFileNote(b, f, files[0], 'sound'); }
+    if (a === 'words') { c.remove(); openNote({ f, n: { id: null, kind: 'words', text: '' } }, true); }
+  });
+  c.addEventListener('keydown', e => { if (e.key === 'Escape') c.remove(); });
+}
+const esc = t => String(t ?? '').replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+async function addFileNote(b, f, file, kind){
+  if (kind === 'photo' && !/^image\/(png|jpeg|gif|webp)$/.test(file.type)) return say('that photo type won’t open here · try a .jpg or .png', false, 5000);
+  const n = { id: uid(), kind, added: now(), by: me, mime: file.type || '', color: [2, 4, 6, 3, 5, 0, 1, 8][realNotes(f).length % 8] };
+  say('adding …', true);
+  try {
+    Object.assign(n, await store.putAudio(file, n.id, (k, m) => say(`adding · piece ${k} of ${m} …`, true)));
+    n.mime = file.type || n.mime;
+    const notes = [...realNotes(f), n]; f.notes = notes;
+    await store.patchFlower(b, f.id, { notes });
+    say(`pollen landed on ${f.name ? '“' + short(f.name, 24) + '”' : 'the flower'}`);
+  } catch (e) { say('couldn’t add that' + (e?.message ? ' · ' + e.message : ''), false, 6000); }
+}
+async function addNote(b, f, file){ return addFileNote(b, f, file, 'sound'); }
+/* open words, a photo or a video that grows on a flower */
+async function openNote(nb, writing){
+  const b = cur(), f = nb.f, n = nb.n; if (!b) return;
+  const mine = !n.id || ownsBag(b) || n.by === me || (b.shared && canUpload && !n.by);
+  const kind = n.kind;
+  closeCard();
+  const c = document.createElement('div'); c.className = 'card view' + (kind === 'words' ? ' wordcard' : ''); c.id = 'card'; c.setAttribute('role', 'dialog'); c.setAttribute('aria-label', kind);
+  c.innerHTML = `<button class="xbtn" data-a="done" aria-label="${kind === 'words' && mine ? 'Save and close' : 'Close'}">×</button>
+    ${kind === 'words' ? (mine ? `<textarea id="noteIn" placeholder="write…" aria-label="Words" maxlength="2000"></textarea>` : `<div class="words-in" id="noteRO"></div>`)
+      : kind === 'photo' ? `<img id="media" alt="photo">` : `<video id="media" controls playsinline></video>`}
+    <div class="foot"><span>${osIcon(kind).replace('<svg', '<svg style="width:12px;height:12px;vertical-align:-1px;margin-right:4px"')}${n.id ? dayOf(n.added) : ''}</span>${mine && n.id ? `<button class="bye" data-a="out">pluck</button>` : ''}</div>`;
+  document.body.appendChild(c);
+  const place = () => { const nbx = noteBoxes.find(x => x.f.id === f.id && x.n.id === n.id), x0 = nbx ? (nbx.x - Math.floor(pan.x)) * S : innerWidth / 2, y0 = nbx ? nbx.y * S : innerHeight / 2;
+    c.style.left = clamp(x0 - c.offsetWidth / 2, 16, innerWidth - c.offsetWidth - 16) + 'px'; c.style.top = clamp(y0 - c.offsetHeight - 12, 16, innerHeight - c.offsetHeight - 16) + 'px'; };
+  place();
+  if (kind !== 'words') { const src = await store.audioSrc(n); const m = $('#media'); if (m && src) { m.src = src; m.onload = m.onloadedmetadata = place; } else if (!src) say('this isn’t here'); }
+  const saveWords = async () => {
+    const text = ($('#noteIn')?.value || '').trim();
+    let notes = realNotes(f);
+    const id = n.id && n.id !== 'marker' ? n.id : uid();
+    notes = notes.filter(x => x.id !== id);
+    if (text) notes.push({ id, kind: 'words', text, added: n.added || now(), by: n.by || me, color: n.color ?? 7 });
+    f.notes = notes; const patch = { notes }; if (n.id === 'marker' || f.marker) { patch.marker = null; f.marker = null; }
+    if (text || n.id) await store.patchFlower(b, f.id, patch);
+  };
+  if (kind === 'words') { if (mine) { const t = $('#noteIn'); t.value = n.text || ''; if (writing) t.focus(); } else $('#noteRO').textContent = n.text || ''; }
+  c.addEventListener('click', async e => {
+    const a = e.target.dataset.a;
+    if (a === 'done') { if (kind === 'words' && mine) await saveWords(); c.remove(); }
+    if (a === 'out') { c.remove(); const notes = realNotes(f).filter(x => x.id !== n.id); f.notes = notes; const patch = { notes };
+      if (n.id === 'marker') { patch.marker = null; f.marker = null; }
+      await store.patchFlower(b, f.id, patch); if (n.id !== 'marker') store.dropAudio?.(n); }
+  });
+  c.addEventListener('keydown', async e => { if (e.key === 'Escape') { if (kind === 'words' && mine) await saveWords(); c.remove(); } });
+}
+function editNote(nb, x, y){
+  const b = cur(), f = nb.f, n = nb.n; if (!b) return;
+  const mine = ownsBag(b) || n.by === me;
+  const c = card(x, y - 80, `<div>${noteLabel(n)}</div><div class="row"><button data-a="play">${voices.has(nb.key) ? 'stop' : 'listen'}</button>${mine ? '<button class="bye" data-a="out">pluck</button>' : ''}<button data-a="x">close</button></div>`);
+  c.addEventListener('click', async e => {
+    const a = e.target.dataset.a;
+    if (a === 'play') { closeCard(); tapKey(nb.key); }
+    if (a === 'x') closeCard();
+    if (a === 'out') { stopOne(nb.key); closeCard(); const notes = realNotes(f).filter(x => x.id !== n.id); f.notes = notes;
+      await store.patchFlower(b, f.id, { notes }); store.dropAudio?.(n); }
+  });
+}
+function editFlower(fid, x, y){
+  const b = cur(), f = b?.flowers?.[fid]; if (!f || !canTend(f)) return;
+  const c = card(x, y - 110, `<input type="text" id="nameIn" aria-label="Name" placeholder="name the flower"><div class="row"><button data-a="done">done</button><button class="bye" data-a="out">uproot</button><button data-a="note">pollen +</button></div>`);
+  const inp = $('#nameIn'); inp.value = f.name || ''; inp.focus(); inp.select();
+  let t; inp.addEventListener('input', () => { f.name = inp.value; clearTimeout(t); t = setTimeout(() => store.patchFlower(b, fid, { name: f.name }), 500); });
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === 'Escape') closeCard(); });
+  c.addEventListener('click', async e => {
+    const a = e.target.dataset.a;
+    if (a === 'done') closeCard();
+    if (a === 'note') annotate(b, f);
+    if (a === 'draw') {
+      const grid = centerGrid(blossomOf(f).rows);
+      const res = await drawPad({ name: f.name, grid, edit: true });
+      if (res) { f.name = res.name; f.draw = res.draw; blossoms.delete(fid); await store.patchFlower(b, fid, { name: f.name, draw: res.draw }); }
+    }
+    if (a === 'out') { stopOne(fid); closeCard(); delete b.flowers[fid]; render(); await store.removeFlower({ ...b, flowers: { ...b.flowers, [fid]: f } }, fid); }
+  });
+}
+function editBag(btn){
+  const b = cur(); if (!b) return;
+  const r = btn.getBoundingClientRect(), owner = ownsBag(b);
+  const c = card(r.left + 125, r.bottom + 8, `
+    ${owner ? `<input type="text" id="bagName" aria-label="Patch name">` : `<div id="bagNameRO"></div>`}
+    ${owner ? `<div class="row"><button data-a="done">done</button>${store.shares ? '<button data-a="share">share</button>' : ''}<button class="bye" data-a="del">compost</button></div>` : `<div class="soft">${ACCESS[accessOf(b)].hint}</div>`}`);
+  if (owner) { const inp = $('#bagName'); inp.value = b.name || ''; let t; inp.addEventListener('input', () => { b.name = inp.value; $(`[data-bag="${b.id}"]`).firstChild.textContent = b.name; clearTimeout(t); t = setTimeout(() => store.rename(b, b.name), 500); });
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === 'Escape') closeCard(); }); }
+  else $('#bagNameRO').textContent = b.name || 'patch';
+  c.addEventListener('click', async e => {
+    const a = e.target.dataset.a; if (!a) return;
+    if (a === 'done') closeCard();
+    if (a === 'share') openShare();
+    if (a === 'del') { if (e.target.dataset.sure) { closeCard(); openTabs = openTabs.filter(x => x !== b.id); saveTabs(); await store.deleteBag(b); curId = null; goGarden(); } else { e.target.dataset.sure = '1'; e.target.textContent = 'tap again to compost'; } }
+  });
+}
+document.addEventListener('click', async e => {
+  if (e.target.closest('[data-close]')) return;
+  const t = e.target.closest('.tab'); if (!t) return;
+  if (t.dataset.act === 'garden') return goGarden();
+  if (t.dataset.act === 'newbag') { const id = await store.createBag('patch ' + (Object.keys(bags).length + 1)); go(id); return; }
+  if (t.dataset.bag === curId) editBag(t); else go(t.dataset.bag);
+});
+document.addEventListener('click', e => {
+  const x = e.target.closest('[data-close]'); if (x) { e.stopPropagation(); closeTab(x.dataset.close); }
+});
+function go(id){
+  if (id === curId && view === 'patch') return;
+  stopAll(); closeCard(); view = 'patch'; curId = id; shapes.clear(); shown.clear(); pile.clear(); flakes.length = 0; pan.x = 0;
+  try { history.replaceState(null, '', '#b-' + id); } catch {}
+  render(); joinRoomFor(cur());
+}
+
+/* =================== test panel =================== */
+$('#testbtn').addEventListener('click', () => { const p = $('#test'); p.hidden = !p.hidden; $('#testbtn').classList.toggle('on', !p.hidden); $('#testbtn').setAttribute('aria-expanded', String(!p.hidden)); });
+$('#days').addEventListener('input', e => { T.days = +e.target.value; $('#daysOut').textContent = T.days; });
+$('#tabs').addEventListener('change', e => { T.tabs = e.target.checked; renderHere(); });
+$('#fake').addEventListener('change', e => { T.fake = e.target.checked; renderHere(); });
+
+/* =================== the bee =================== */
+/* a pixel bee for the cursor (16×16, drawn at 2× = 32px), head on the left: that's where you point */
+(function(){
+  const BEE = [
+    '................',
+    '......WW..WW....',
+    '.....WWWW.WWWW..',
+    '.....WWWW.WWWW..',
+    '......WW...WW...',
+    '...KKKKKKKKKK...',
+    '..KYYPYYPYYPYK..',
+    '.KYEYPYYPYYPYYK.',
+    '.KYYYPYYPYYPYYKK',
+    '.KYYYPYYPYYPYYK.',
+    '..KYYPYYPYYPYK..',
+    '...KKKKKKKKKK...',
+    '................', '................', '................', '................'];
+  const C = { K: '#2b1a1f', Y: '#f1c232', P: '#741b47', W: '#dff0ff', E: '#2b1a1f' };
+  let rects = '';
+  BEE.forEach((row, y) => [...row].forEach((ch, x) => { if (C[ch]) rects += `<rect x="${x * 2}" y="${y * 2}" width="2" height="2" fill="${C[ch]}"${ch === 'W' ? ' fill-opacity=".85"' : ''}/>`; }));
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" shape-rendering="crispEdges">${rects}</svg>`;
+  document.documentElement.style.setProperty('--bee', `url("data:image/svg+xml,${encodeURIComponent(svg)}") 3 16, auto`);
+})();
+
+/* a soft buzz while the bee flies: louder and a little higher the faster you move, gone when you stop */
+const buzz = { ctx: null, gain: null, osc: [], last: null, on: true };
+function startBuzz(){
+  if (buzz.ctx) return;
+  try {
+    const ctx = buzz.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const out = buzz.gain = ctx.createGain(); out.gain.value = 0; out.connect(ctx.destination);
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900; lp.connect(out);
+    const wing = ctx.createGain(); wing.gain.value = .6; wing.connect(lp);                 // wing-beat flutter
+    const lfo = ctx.createOscillator(), depth = ctx.createGain(); lfo.frequency.value = 38; depth.gain.value = .4;
+    lfo.connect(depth); depth.connect(wing.gain); lfo.start();
+    [[205, 'sawtooth'], [211, 'sawtooth'], [410, 'triangle']].forEach(([f, type]) => {
+      const o = ctx.createOscillator(); o.type = type; o.frequency.value = f; o.connect(wing); o.start(); buzz.osc.push({ o, f });
+    });
+  } catch { buzz.ctx = null; }
+}
+document.addEventListener('pointerdown', () => { if (buzz.on) { startBuzz(); buzz.ctx?.resume?.(); } }, true);   // browsers need a tap before any sound
+document.addEventListener('pointermove', e => {
+  if (e.pointerType !== 'mouse' || !buzz.on || !buzz.ctx) return;
+  const t = performance.now(), l = buzz.last; buzz.last = { x: e.clientX, y: e.clientY, t };
+  if (!l || t - l.t > 200) return;
+  const speed = Math.hypot(e.clientX - l.x, e.clientY - l.y) / Math.max(1, t - l.t);   // px per ms
+  const k = clamp(speed / 2.2, 0, 1), at = buzz.ctx.currentTime;
+  buzz.gain.gain.setTargetAtTime(.035 * k, at, .05);
+  buzz.osc.forEach(({ o, f }) => o.frequency.setTargetAtTime(f * (1 + .25 * k), at, .08));
+  clearTimeout(buzz.quiet); buzz.quiet = setTimeout(() => buzz.gain.gain.setTargetAtTime(0, buzz.ctx.currentTime, .12), 90);
+});
+document.addEventListener('pointerleave', () => buzz.gain?.gain.setTargetAtTime(0, buzz.ctx.currentTime, .1));
+$('#buzz').addEventListener('change', e => {
+  buzz.on = e.target.checked;
+  try { localStorage.setItem('carrier-buzz', buzz.on ? '1' : '0'); } catch {}
+  if (!buzz.on && buzz.gain) buzz.gain.gain.setTargetAtTime(0, buzz.ctx.currentTime, .05);
+});
+try { if (localStorage.getItem('carrier-buzz') === '0') { buzz.on = false; $('#buzz').checked = false; } } catch {}
+
+/* =================== start =================== */
+addEventListener('resize', resize); resize(); requestAnimationFrame(frame);
+(async () => {
+  const CFG = window.CARRIER_CONFIG || {};
+  let assets = null;
+  if (CFG.supabaseUrl && CFG.supabaseKey && !/PASTE/.test(CFG.supabaseUrl + CFG.supabaseKey)) {
+    // your own site
+    try { await loadScript('vendor/supabase.js'); } catch { say('couldn’t load vendor/supabase.js'); return; }
+    const sb = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseKey);
+    // no sign-in screen: each browser quietly gets its own private id (Supabase "anonymous sign-in")
+    let { data: { session } } = await sb.auth.getSession();
+    if (!session) {
+      const { data, error } = await sb.auth.signInAnonymously();
+      if (error) { say('turn on “Allow anonymous sign-ins” in Supabase → Authentication · ' + error.message, true); return; }
+      session = data.session;
+    }
+    me = session.user.id;
+    store = supabaseBackend(sb, me); room = supabaseRoom(sb, me, (session.user.email || '').split('@')[0]);
+    canUpload = true; canEdit = true; assets = true;
+  } else {
+    const cl = window.claude?.use ? window.claude : null;
+    const [db, as, u, rm] = cl ? await Promise.all(['db', 'assets', 'user', 'room'].map(n => cl.use(n).catch(() => null))) : [null, null, null, null];
+    assets = as; userNS = u; room = rm; me = u ? await u.id() : null;
+    if (db && me) { store = cloudBackend(db, assets, u, me); store.shares = true; canUpload = !!assets; canEdit = await u.canEdit(); }
+    else {
+      store = localBackend(); canUpload = true; canEdit = true;
+      // on a real website this means config.js isn't filled in: say so instead of quietly hiding sharing
+      if (/^https?:$/.test(location.protocol) && !cl) say(CFG.supabaseUrl ? 'not connected: config.js still has the PASTE text · saving in this browser only, no sharing' : 'not connected: config.js is missing · saving in this browser only, no sharing', true);
+    }
+  }
+  let first = true;
+  store.start(async next => {
+    bags = next;
+    if (first) { first = false; const want = (location.hash.match(/^#b-([A-Za-z0-9]+)/) || [])[1];
+      if (want && bags[want]) { curId = want; view = 'patch'; } else view = 'garden'; }
+    if (!Object.keys(bags).length && (store.kind === 'local' || assets) && !startedEmpty) { startedEmpty = true; await store.createBag('my sound archive'); return; }
+    if (view === 'patch' && (!curId || !bags[curId])) { view = 'garden'; curId = null; }
+    render(); if (view === 'patch') joinRoomFor(cur());
+  });
+})();
+addEventListener('hashchange', () => { if (location.hash === '#garden') return view !== 'garden' && goGarden(); const id = (location.hash.match(/^#b-([A-Za-z0-9]+)/) || [])[1]; if (id && bags[id]) go(id); });
+</script>
+
+</body></html>
